@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAtom } from 'jotai';
+import { Link } from 'react-router-dom';
 
 import { countAtom } from './atoms';
 
@@ -15,6 +16,9 @@ const App: React.FC = () => {
         <p>Hello Electron + Vite + React!</p>
         <p>
           <button onClick={() => setCount(count => count + 1)}>count is: {count}</button>
+        </p>
+        <p>
+          <Link to="/settings">Settings</Link>
         </p>
         <p>
           Edit <code>App.tsx</code> and save to test HMR updates.
