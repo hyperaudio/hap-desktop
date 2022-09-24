@@ -1,0 +1,35 @@
+.app {
+  text-align: center;
+
+  .appHeader {
+    background-color: #282c34;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(10px + 2vmin);
+    color: white;
+
+    button {
+      font-size: calc(10px + 2vmin);
+    }
+
+    .appLink {
+      color: #61dafb;
+    }
+
+    .staticPublic {
+      display: flex;
+      align-items: center;
+
+      code {
+        padding: 4px 7px;
+        margin: 0 4px;
+        border-radius: 4px;
+        background-color: rgb(30, 30, 30, 0.7);
+        font-size: 13px;
+      }
+    }
+  }
+}
