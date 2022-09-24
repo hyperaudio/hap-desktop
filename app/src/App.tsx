@@ -1,8 +1,13 @@
 import { useState } from 'react';
+import { useAtom } from 'jotai';
+
+import { countAtom } from './atoms';
+
 import styles from 'styles/app.module.scss';
 
 const App: React.FC = () => {
-  const [count, setCount] = useState(0);
+  // const [count, setCount] = useState(0);
+  const [count, setCount] = useAtom(countAtom);
 
   return (
     <div className={styles.app}>
@@ -15,18 +20,6 @@ const App: React.FC = () => {
           Edit <code>App.tsx</code> and save to test HMR updates.
         </p>
         <div>
-          <a className={styles.appLink} href="https://reactjs.org" target="_blank" rel="noopener noreferrer">
-            Learn React
-          </a>
-          {' | '}
-          <a
-            className={styles.appLink}
-            href="https://vitejs.dev/guide/features.html"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Vite Docs
-          </a>
           <div className={styles.staticPublic}>
             Place static files into the <code>/public</code> folder
           </div>
