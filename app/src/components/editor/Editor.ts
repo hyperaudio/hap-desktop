@@ -87,28 +87,41 @@ const Root = styled(Box)(({ theme }) => ({
   },
 }));
 
-const Editor = props => {
-  const {
-    initialState = EditorState.createEmpty(),
-    playheadDecorator = PlayheadDecorator,
-    decorators = [],
-    time = 0,
-    seekTo,
-    showDialog,
-    aligner = wordAligner,
-    // speakers: initialSpeakers = {},
-    speakers,
-    setSpeakers,
-    onChange: onChangeProp,
-    autoScroll,
-    play,
-    playing,
-    pause,
-    readOnly,
-    // activeInterval,
-    // setActiveInterval,
-    ...rest
-  } = props;
+interface EditorProps {
+  initialState: EditorState,
+  playheadDecorator: typeof PlayheadDecorator,
+  decorators: CompositeDecorator[] | any[],
+  time: number,
+  seekTo: (time: number) => void,
+  showDialog: boolean,
+  aligner: (words: any[], text: string, start: number, end: number, callback: () => void) => void,
+  speakers: any[],
+  setSpeakers: (speakers: any[]) => void,
+  onChange: (editorState: EditorState) => void,
+  autoScroll: boolean,
+  play: boolean,
+  playing: boolean,
+  pause: () => void,
+  readOnly: boolean,
+}
+
+const Editor = ({initialState = EditorState.createEmpty(),
+  playheadDecorator = PlayheadDecorator,
+  decorators = [],
+  time = 0,
+  seekTo,
+  showDialog,
+  aligner = wordAligner,
+  speakers,
+  setSpeakers,
+  onChange: onChangeProp,
+  autoScroll,
+  play,
+  playing,
+  pause,
+  readOnly,
+  ...rest}: EditorProps): JSX.Element => {
+
 
   const theme = useTheme();
 
