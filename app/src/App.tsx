@@ -30,6 +30,9 @@ const App: React.FC = () => {
             <Link to="/settings">Settings</Link>
           </p>
           <p>
+            <Link to="/edit">Edit</Link>
+          </p>
+          <p>
             Edit <code>App.tsx</code> and save to test HMR updates.
           </p>
           <div>
