@@ -1,5 +1,6 @@
-import { EditorState, SelectionState, Modifier } from 'draft-js';
+import { EditorState, SelectionState, Modifier, Editor, EditorChangeType, ContentBlock } from 'draft-js';
 import { Map } from 'immutable';
+import React from 'react';
 
 const blockAligners = { current: {} };
 
@@ -243,7 +244,7 @@ const deferAlignment = (editorState, changedEditorState, aligner, dispatch) => {
   }
 };
 
-const reducer = (editorState, { type, editorState: changedEditorState, currentBlock, speaker, aligner, dispatch }) => {
+const reducer = (editorState: EditorState, { type, editorState: changedEditorState, currentBlock, speaker, aligner, dispatch }: { type: EditorChangeType, editorState: EditorState, currentBlock?: ContentBlock, speaker?: string, aligner: (words: any[], text: string, start: number, end: number, callback: () => void) => any, dispatch: React.Dispatch<any> }) => {
   const contentState = editorState.getCurrentContent();
   const changedContentState = changedEditorState.getCurrentContent();
 

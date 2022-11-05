@@ -1,6 +1,15 @@
 import React, { useMemo, useCallback, useReducer, useState, useRef, useEffect } from 'react';
-import { Editor as DraftEditor, EditorState, ContentState, Modifier, CompositeDecorator, convertToRaw } from 'draft-js';
-import TC from 'smpte-timecode';
+import {
+  Editor as DraftEditor,
+  EditorState,
+  ContentState,
+  Modifier,
+  CompositeDecorator,
+  convertToRaw,
+  DraftBlockType,
+  ContentBlock,
+} from 'draft-js';
+import TC, { FRAMERATE } from 'smpte-timecode';
 import { alignSTT, alignSTTwithPadding } from '@bbc/stt-align-node';
 import bs58 from 'bs58';
 import { useDebounce } from 'use-debounce';
@@ -19,6 +28,7 @@ import { styled, useTheme } from '@mui/material/styles';
 
 import PlayheadDecorator from './PlayheadDecorator';
 import reducer from './reducer';
+import { Theme } from '@mui/system';
 
 const filter = createFilterOptions();
 
@@ -88,24 +98,25 @@ const Root = styled(Box)(({ theme }) => ({
 }));
 
 interface EditorProps {
-  initialState: EditorState,
-  playheadDecorator: typeof PlayheadDecorator,
-  decorators: CompositeDecorator[] | any[],
-  time: number,
-  seekTo: (time: number) => void,
-  showDialog: boolean,
-  aligner: (words: any[], text: string, start: number, end: number, callback: () => void) => void,
-  speakers: any[],
-  setSpeakers: (speakers: any[]) => void,
-  onChange: (editorState: EditorState) => void,
-  autoScroll: boolean,
-  play: boolean,
-  playing: boolean,
-  pause: () => void,
-  readOnly: boolean,
+  initialState: EditorState;
+  playheadDecorator: typeof PlayheadDecorator;
+  decorators: CompositeDecorator[] | any[];
+  time: number;
+  seekTo: (time: number) => void;
+  showDialog: boolean;
+  aligner: (words: any[], text: string, start: number, end: number, callback: () => void) => void;
+  speakers: any[];
+  setSpeakers: (speakers: any[]) => void;
+  onChange: (editorState: EditorState) => void;
+  autoScroll: boolean;
+  play: boolean;
+  playing: boolean;
+  pause: () => void;
+  readOnly: boolean;
 }
 
-const Editor = ({initialState = EditorState.createEmpty(),
+const Editor = ({
+  initialState = EditorState.createEmpty(),
   playheadDecorator = PlayheadDecorator,
   decorators = [],
   time = 0,
@@ -120,9 +131,8 @@ const Editor = ({initialState = EditorState.createEmpty(),
   playing,
   pause,
   readOnly,
-  ...rest}: EditorProps): JSX.Element => {
-
-
+  ...rest
+}: EditorProps): JSX.Element => {
   const theme = useTheme();
 
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -139,7 +149,7 @@ const Editor = ({initialState = EditorState.createEmpty(),
   const [speakerQuery, setSpeakerQuery] = useState('');
 
   const onChange = useCallback(
-    editorState => dispatch({ type: editorState.getLastChangeType(), editorState, aligner, dispatch }),
+    (editorState: EditorState) => dispatch({ type: editorState.getLastChangeType(), editorState, aligner, dispatch }),
     [aligner],
   );
 
@@ -379,15 +389,15 @@ const Editor = ({initialState = EditorState.createEmpty(),
     >
       <DraftEditor
         {...{ editorState, onChange, onFocus, onBlur, readOnly, ...rest }}
-        handleDrop={() => true}
-        handleDroppedFiles={() => true}
-        handlePastedFiles={() => true}
+        // handleDrop={() => true}
+        // handleDroppedFiles={() => true}
+        // handlePastedFiles={() => true}
         handlePastedText={handlePastedText}
       />
       {editorState
         .getCurrentContent()
         .getBlocksAsArray()
-        .map(block => (
+        .map((block: ContentBlock) => (
           <BlockStyle key={block.getKey()} {...{ block, speakers, time }} />
         ))}
       {Boolean(speakerAnchor) && (
@@ -497,7 +507,17 @@ const Editor = ({initialState = EditorState.createEmpty(),
   );
 };
 
-const BlockStyle = ({ block, speakers, time, activeInterval }) => {
+const BlockStyle = ({
+  block,
+  speakers,
+  time,
+  activeInterval,
+}: {
+  block: ContentBlock;
+  speakers: any;
+  time: number;
+  activeInterval?: any[];
+}) => {
   const theme = useTheme();
 
   const speaker = useMemo(() => speakers?.[block.getData().get('speaker')]?.name ?? '', [block, speakers]);
@@ -517,7 +537,23 @@ const BlockStyle = ({ block, speakers, time, activeInterval }) => {
   );
 };
 
-const Style = ({ theme, blockKey, speaker, played, current, tc, intersects }) => (
+const Style = ({
+  theme,
+  blockKey,
+  speaker,
+  played,
+  current,
+  tc,
+  intersects,
+}: {
+  theme: Theme;
+  blockKey: string;
+  speaker: string;
+  played: boolean;
+  current: boolean;
+  tc: string;
+  intersects?: boolean;
+}) => (
   <style scoped>
     {`
       div[data-block='true'][data-offset-key="${blockKey}-0-0"] {
@@ -540,34 +576,35 @@ const Style = ({ theme, blockKey, speaker, played, current, tc, intersects }) =>
   </style>
 );
 
-const timecode = (seconds, frameRate = 25, dropFrame = false) =>
-  TC(seconds * frameRate, frameRate, dropFrame)
+const timecode = (seconds = 0, frameRate = 25, dropFrame = false) =>
+  TC(seconds * frameRate, frameRate as FRAMERATE, dropFrame)
     .toString()
     .split(':')
     .slice(0, 3)
     .join(':');
 
-const wordAligner = (words, text, start, end, callback) => {
+const wordAligner = (words: any[], text: string, start: number, end: number, callback: () => void) => {
   const aligned = alignSTTwithPadding({ words }, text, start, end);
+  // FIXME
   // const aligned =
   //   words.length > 5 ? alignSTT({ words }, text, start, end) : alignSTTwithPadding({ words }, text, start, end);
-  // console.log({ text, words, aligned });
 
-  const items = aligned.map(({ start, end, text }, i, arr) => ({
-    start,
-    end,
-    text,
-    length: text.length,
-    offset:
-      arr
-        .slice(0, i)
-        .map(({ text }) => text)
-        .join(' ').length + (i === 0 ? 0 : 1),
-  }));
+  const items = aligned.map(
+    ({ start, end, text }: { start: number; end: number; text: string }, i: number, arr: any[]) => ({
+      start,
+      end,
+      text,
+      length: text.length,
+      offset:
+        arr
+          .slice(0, i)
+          .map(({ text }: { text: string }) => text)
+          .join(' ').length + (i === 0 ? 0 : 1),
+    }),
+  );
 
   callback && callback(items);
   return items;
 };
 
 export default Editor;
-//

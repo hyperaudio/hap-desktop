@@ -24,7 +24,7 @@ const PlayheadDecorator = {
     const { start, end, items } = contentBlock.getData().toJS();
 
     if (start <= time && time < end) {
-      const item = items?.filter(({ start }) => start <= time).pop();
+      const item = items?.filter(({ start = 0 }) => start <= time).pop();
       if (!item) return;
 
       callback(item.offset, item.offset + item.length);

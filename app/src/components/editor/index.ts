@@ -1,10 +1,10 @@
-import Draftjs, { EditorState, EditorBlock, convertFromRaw, convertToRaw, getVisibleSelectionRect } from 'draft-js';
+import Draftjs, { EditorState, EditorBlock, convertFromRaw, convertToRaw, getVisibleSelectionRect, ContentBlock, RawDraftContentBlock } from 'draft-js';
 
 import Editor from './Editor';
 
 const flatten = list => list.reduce((a, b) => a.concat(Array.isArray(b) ? flatten(b) : b), []);
 
-const createEntityMap = blocks =>
+const createEntityMap = (blocks: RawDraftContentBlock) =>
   flatten(blocks.map(block => block.entityRanges)).reduce(
     (acc, data) => ({
       ...acc,
