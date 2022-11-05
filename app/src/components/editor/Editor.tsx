@@ -8,6 +8,7 @@ import {
   convertToRaw,
   DraftBlockType,
   ContentBlock,
+  RawDraftContentBlock,
 } from 'draft-js';
 import TC, { FRAMERATE } from 'smpte-timecode';
 import { alignSTT, alignSTTwithPadding } from '@bbc/stt-align-node';
@@ -107,7 +108,15 @@ interface EditorProps {
   aligner: (words: any[], text: string, start: number, end: number, callback: () => void) => void;
   speakers: any[];
   setSpeakers: (speakers: any[]) => void;
-  onChange: (editorState: EditorState) => void;
+  onChange: ({
+    speakers,
+    blocks,
+    contentState,
+  }: {
+    speakers: any[];
+    blocks: RawDraftContentBlock[];
+    contentState: ContentState;
+  }) => void;
   autoScroll: boolean;
   play: boolean;
   playing: boolean;
@@ -143,9 +152,9 @@ const Editor = ({
   // );
 
   const [wasPlaying, setWasPlaying] = useState(false);
-  const [currentBlock, setCurrentBlock] = useState(null);
-  const [speakerAnchor, setSpeakerAnchor] = useState(null);
-  const [speaker, setSpeaker] = useState(null);
+  const [currentBlock, setCurrentBlock] = useState<ContentBlock | null>(null);
+  const [speakerAnchor, setSpeakerAnchor] = useState<HTMLElement | null>(null);
+  const [speaker, setSpeaker] = useState<{ [key: string]: any } | null>(null);
   const [speakerQuery, setSpeakerQuery] = useState('');
 
   const onChange = useCallback(
@@ -160,9 +169,9 @@ const Editor = ({
     console.log('onChangeProp');
     onChangeProp({
       speakers,
-      blocks: convertToRaw(debouncedState.getCurrentContent()).blocks.map(block => {
-        delete block.depth;
-        delete block.type;
+      blocks: convertToRaw(debouncedState.getCurrentContent()).blocks.map((block: RawDraftContentBlock) => {
+        // delete block.depth;
+        // delete block.type;
         return block;
       }),
       contentState: debouncedState.getCurrentContent(),
@@ -191,7 +200,7 @@ const Editor = ({
   );
 
   const handleClick = useCallback(
-    e => {
+    (event: React.MouseEvent<HTMLElement>) => {
       setFocused(true);
       setTimeout(() => setFocused(true), 200);
 
@@ -201,16 +210,19 @@ const Editor = ({
       const selectionState = editorState.getSelection();
       if (!selectionState.isCollapsed()) return;
 
-      if (e.target.tagName === 'DIV' && e.target.getAttribute('data-editor') && !rest.readOnly) {
-        const mx = e.clientX;
-        const my = e.clientY;
-        const { x: bx, y: by } = e.target.getBoundingClientRect();
+      const target = event.target as HTMLElement;
+
+      if (target.tagName === 'DIV' && target.getAttribute('data-editor')) {
+        // FIXME && !rest.readOnly
+        const mx = event.clientX;
+        const my = event.clientY;
+        const { x: bx, y: by } = target.getBoundingClientRect();
 
         const x = mx - bx;
         const y = my - by;
 
         if (x < SPEAKER_AREA_WIDTH - 10 && y < SPEAKER_AREA_HEIGHT) {
-          const key = e.target.getAttribute('data-offset-key').replace('-0-0', '');
+          const key = target.getAttribute('data-offset-key')?.replace('-0-0', '') ?? 'FIXME'; // FIXME
           const block = editorState.getCurrentContent().getBlockForKey(key);
           const data = block.getData().toJS();
           setCurrentBlock(block);
@@ -219,14 +231,14 @@ const Editor = ({
           pause && pause();
 
           setSpeaker({ id: data.speaker, name: speakers?.[data.speaker]?.name });
-          setSpeakerAnchor(e.target);
+          setSpeakerAnchor(target);
         }
       } else {
         setCurrentBlock(null);
 
         let key = selectionState.getAnchorKey();
         if (readOnly) {
-          key = e.target.parentElement.parentElement.getAttribute('data-offset-key')?.replace('-0-0', '');
+          key = target.parentElement?.parentElement?.getAttribute('data-offset-key')?.replace('-0-0', '') ?? 'FIXME'; // FIXME
         }
 
         if (!key) return;
@@ -235,13 +247,13 @@ const Editor = ({
         let start = selectionState.getStartOffset();
         if (readOnly) {
           start =
-            window.getSelection().anchorOffset +
-            (e.target.parentElement?.previousSibling?.textContent.length ?? 0) +
-            (e.target.parentElement?.previousSibling?.previousSibling?.textContent.length ?? 0);
+            (window.getSelection()?.anchorOffset ?? 0) +
+            (target.parentElement?.previousSibling?.textContent?.length ?? 0) +
+            (target.parentElement?.previousSibling?.previousSibling?.textContent?.length ?? 0);
         }
 
         const items = block.getData().get('items');
-        const item = items?.filter(({ offset }) => offset <= start)?.pop();
+        const item = items?.filter(({ offset = 0 }) => offset <= start)?.pop();
 
         console.log('seekTo', item?.start);
         item?.start && seekTo && seekTo(item.start);
