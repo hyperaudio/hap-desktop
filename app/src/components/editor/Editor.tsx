@@ -583,7 +583,13 @@ const timecode = (seconds = 0, frameRate = 25, dropFrame = false) =>
     .slice(0, 3)
     .join(':');
 
-const wordAligner = (words: any[], text: string, start: number, end: number, callback: () => void) => {
+const wordAligner = (
+  words: any[],
+  text: string,
+  start: number,
+  end: number,
+  callback: (items: [{ [key: string]: any }]) => void,
+) => {
   const aligned = alignSTTwithPadding({ words }, text, start, end);
   // FIXME
   // const aligned =

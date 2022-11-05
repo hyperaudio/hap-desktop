@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { styled } from '@mui/material/styles';
+import { ContentBlock, EditorState } from 'draft-js';
 
 const PREFIX = 'Playhead';
 const classes = {
@@ -15,12 +16,17 @@ const Root = styled('span')(({ theme }) => ({
   },
 }));
 
-const PlayheadSpan = props => {
-  return <Root className={classes.root}>{props.children}</Root>;
+const PlayheadSpan = ({ children }: { children: JSX.Element[] }) => {
+  return <Root className={classes.root}>{children}</Root>;
 };
 
 const PlayheadDecorator = {
-  strategy: (contentBlock, callback, contentState, time = 0) => {
+  strategy: (
+    contentBlock: ContentBlock,
+    callback: (offset: number, length: number) => void,
+    contentState: EditorState,
+    time = 0,
+  ) => {
     const { start, end, items } = contentBlock.getData().toJS();
 
     if (start <= time && time < end) {

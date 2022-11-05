@@ -2,11 +2,11 @@ import Draftjs, { EditorState, EditorBlock, convertFromRaw, convertToRaw, getVis
 
 import Editor from './Editor';
 
-const flatten = list => list.reduce((a, b) => a.concat(Array.isArray(b) ? flatten(b) : b), []);
+const flatten = (list: any[]): any[] => list.reduce((a, b) => a.concat(Array.isArray(b) ? flatten(b) : b), []);
 
-const createEntityMap = (blocks: RawDraftContentBlock) =>
-  flatten(blocks.map(block => block.entityRanges)).reduce(
-    (acc, data) => ({
+const createEntityMap = (blocks: RawDraftContentBlock[]) =>
+  flatten(blocks.map((block: RawDraftContentBlock) => block.entityRanges)).reduce(
+    (acc: {[key: string]: any}, data: {[key: string]: any}) => ({
       ...acc,
       [data.key]: { type: 'TOKEN', mutability: 'MUTABLE', data },
     }),
