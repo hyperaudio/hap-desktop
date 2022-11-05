@@ -404,7 +404,7 @@ const Editor = ({
         <Popover
           anchorEl={speakerAnchor}
           open={true}
-          placement="top-start"
+          // placement="top-start" // TODO: @pio: make it follow new API
           PaperProps={{
             sx: {
               overflow: 'visible',
@@ -414,7 +414,7 @@ const Editor = ({
             },
             elevation: 6,
           }}
-          transition
+          // transition // TODO: @pio: make it follow new API
         >
           <ClickAwayListener onClickAway={handleClickAway}>
             <Autocomplete
@@ -432,6 +432,7 @@ const Editor = ({
                 />
               )}
               filterOptions={(options, params) => {
+                // TODO: @pio: rewrite this to match https://mui.com/material-ui/react-autocomplete/#custom-filter
                 const filtered = filter(options, params);
                 const { inputValue } = params;
                 // Suggest the creation of a new value
