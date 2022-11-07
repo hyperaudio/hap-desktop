@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { styled } from '@mui/material/styles';
-import { ContentBlock, EditorState } from 'draft-js';
+import { ContentBlock, ContentState, EditorState } from 'draft-js';
 
 const PREFIX = 'Playhead';
 const classes = {
@@ -24,7 +24,7 @@ const PlayheadDecorator = {
   strategy: (
     contentBlock: ContentBlock,
     callback: (offset: number, length: number) => void,
-    contentState: EditorState,
+    contentState: ContentState,
     time = 0,
   ) => {
     const { start, end, items } = contentBlock.getData().toJS();
