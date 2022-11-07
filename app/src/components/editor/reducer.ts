@@ -4,7 +4,7 @@ import React from 'react';
 
 const blockAligners: {current: {[key: string]: any}} = { current: {} };
 
-const processBlockJoin = (editorState: EditorState, changedEditorState: EditorState, aligner: (words: any[], text: string, start: number, end: number, callback?: (items: [{[key: string]: any}]) => void) => [{[key: string]: any}]): EditorState => {
+const processBlockJoin = (editorState: EditorState, changedEditorState: EditorState, aligner: (words: { [key: string]: any }[], text: string, start: number, end: number, callback?: (items: {[key: string]: any}[]) => void) => {[key: string]: any}[]): EditorState => {
   const contentState = editorState.getCurrentContent();
   const changedContentState = changedEditorState.getCurrentContent();
   const blockKey = changedEditorState.getSelection().getStartKey();
@@ -55,7 +55,7 @@ const processBlockJoin = (editorState: EditorState, changedEditorState: EditorSt
   );
 };
 
-const processBlockSplit = (editorState: EditorState, changedEditorState: EditorState, aligner: (words: any[], text: string, start: number, end: number, callback?: (items: [{[key: string]: any}]) => void)=> [{[key: string]: any}]): EditorState => {
+const processBlockSplit = (editorState: EditorState, changedEditorState: EditorState, aligner: (words: { [key: string]: any }[], text: string, start: number, end: number, callback?: (items: {[key: string]: any}[]) => void) => {[key: string]: any}[]): EditorState => {
   const changedContentState = changedEditorState.getCurrentContent();
   const blockKey = changedEditorState.getSelection().getStartKey();
 
@@ -129,7 +129,7 @@ const processBlockSplit = (editorState: EditorState, changedEditorState: EditorS
   );
 };
 
-const deferAlignment = (editorState: EditorState, changedEditorState: EditorState, aligner: (words: any[], text: string, start: number, end: number, callback?: (items: [{[key: string]: any}]) => void) => [{[key: string]: any}], dispatch: React.Dispatch<any>) => {
+const deferAlignment = (editorState: EditorState, changedEditorState: EditorState, aligner: (words: { [key: string]: any }[], text: string, start: number, end: number, callback?: (items: {[key: string]: any}[]) => void) => {[key: string]: any}[], dispatch: React.Dispatch<any>) => {
   if (!aligner) return;
 
   const contentState = editorState.getCurrentContent();
@@ -255,7 +255,7 @@ const deferAlignment = (editorState: EditorState, changedEditorState: EditorStat
   }
 };
 
-const reducer = (editorState: EditorState, { type, editorState: changedEditorState, currentBlock, speaker, aligner, dispatch }: { type: EditorChangeType | 'change-speaker', editorState: EditorState, currentBlock?: ContentBlock, speaker?: string, aligner: (words: any[], text: string, start: number, end: number, callback?: (items: [{[key: string]: any}]) => void) => [{[key: string]: any}], dispatch: React.Dispatch<any> }) => {
+const reducer = (editorState: EditorState, { type, editorState: changedEditorState, currentBlock, speaker, aligner, dispatch }: { type: EditorChangeType | 'change-speaker', editorState: EditorState, currentBlock?: ContentBlock | null, speaker?: string, aligner: (words: { [key: string]: any }[], text: string, start: number, end: number, callback?: (items: {[key: string]: any}[]) => void) => {[key: string]: any}[], dispatch: React.Dispatch<any> }) => {
   const contentState = editorState.getCurrentContent();
   const changedContentState = changedEditorState.getCurrentContent();
 

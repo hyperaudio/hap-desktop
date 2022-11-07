@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useReducer, useState, useRef, useEffect } from 'react';
+import React, { useMemo, useCallback, useReducer, useState, useRef, useEffect, SyntheticEvent } from 'react';
 import {
   Editor as DraftEditor,
   EditorState,
@@ -105,20 +105,26 @@ interface EditorProps {
   time: number;
   seekTo: (time: number) => void;
   showDialog: boolean;
-  aligner: (words: any[], text: string, start: number, end: number, callback: () => void) => void;
-  speakers: any[];
-  setSpeakers: (speakers: any[]) => void;
+  aligner: (
+    words: { [key: string]: any }[],
+    text: string,
+    start: number,
+    end: number,
+    callback?: (items: { [key: string]: any }[]) => void,
+  ) => { [key: string]: any }[];
+  speakers: { [key: string]: any };
+  setSpeakers: (speakers: { [key: string]: any }) => void;
   onChange: ({
     speakers,
     blocks,
     contentState,
   }: {
-    speakers: any[];
+    speakers: { [key: string]: any };
     blocks: RawDraftContentBlock[];
     contentState: ContentState;
   }) => void;
   autoScroll: boolean;
-  play: boolean;
+  play: () => void;
   playing: boolean;
   pause: () => void;
   readOnly: boolean;
@@ -281,9 +287,9 @@ const Editor = ({
   // );
 
   const handleSpeakerSet = useCallback(
-    (e, newValue) => {
-      e.preventDefault();
-      e.stopPropagation();
+    (event: SyntheticEvent, newValue: string | { [key: string]: any }) => {
+      event.preventDefault();
+      event.stopPropagation();
       setSpeakerAnchor(null);
       wasPlaying && play && play();
 
@@ -334,25 +340,24 @@ const Editor = ({
     [speakers, currentBlock, editorState, aligner, wasPlaying, play],
   );
 
-  const handleClickAway = useCallback(
-    e => {
-      // eslint-disable-next-line no-extra-boolean-cast
-      if (Boolean(speakerAnchor)) setSpeakerAnchor(null);
-      setCurrentBlock(null);
+  const handleClickAway = useCallback(() => {
+    // eslint-disable-next-line no-extra-boolean-cast
+    if (Boolean(speakerAnchor)) setSpeakerAnchor(null);
+    setCurrentBlock(null);
 
-      wasPlaying && play && play();
-    },
-    [speakerAnchor, wasPlaying, play],
-  );
+    if (wasPlaying) play();
+  }, [speakerAnchor, wasPlaying, play]);
 
   const handlePastedText = useCallback(
-    text => {
+    (text: string) => {
       const blockKey = editorState.getSelection().getStartKey();
       const blocks = editorState.getCurrentContent().getBlocksAsArray();
       const block = blocks.find(block => block.getKey() === blockKey);
+      if (!block) return 'not-handled';
+
       const data = block.getData();
 
-      const blockMap = ContentState.createFromText(text).blockMap;
+      const blockMap = ContentState.createFromText(text).getBlockMap();
       const newState = Modifier.replaceWithFragment(
         editorState.getCurrentContent(),
         editorState.getSelection(),
@@ -373,7 +378,7 @@ const Editor = ({
     return parser.getResult()?.engine?.name;
   }, []);
 
-  const wrapper = useRef();
+  const wrapper = useRef<HTMLElement>();
   useEffect(() => {
     if (!autoScroll || (focused && !readOnly) || speakerAnchor) return;
 
@@ -388,8 +393,8 @@ const Editor = ({
 
     // see https://bugs.chromium.org/p/chromium/issues/detail?id=833617&q=scrollintoview&can=2
     if (readOnly && engine === 'Blink') {
-      playhead.scrollIntoView();
-    } else playhead.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      playhead?.scrollIntoView();
+    } else playhead?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [autoScroll, wrapper, time, focused, speakerAnchor, readOnly]);
 
   return (
@@ -501,7 +506,8 @@ const Editor = ({
                     },
                   }}
                   onClick={e => e.stopPropagation()}
-                  value={speakers[speaker]?.id}
+                  // value={speakers[speaker]?.id}
+                  value="FIXME"
                 />
               )}
               size="small"
@@ -597,30 +603,25 @@ const timecode = (seconds = 0, frameRate = 25, dropFrame = false) =>
     .join(':');
 
 const wordAligner = (
-  words: any[],
+  words: { [key: string]: any }[],
   text: string,
   start: number,
   end: number,
-  callback: (items: [{ [key: string]: any }]) => void,
-) => {
+  callback?: (items: { start: number; end: number; text: string; length: number; offset: number }[]) => void,
+): { start: number; end: number; text: string; length: number; offset: number }[] => {
   const aligned = alignSTTwithPadding({ words }, text, start, end);
-  // FIXME
-  // const aligned =
-  //   words.length > 5 ? alignSTT({ words }, text, start, end) : alignSTTwithPadding({ words }, text, start, end);
 
-  const items = aligned.map(
-    ({ start, end, text }: { start: number; end: number; text: string }, i: number, arr: any[]) => ({
-      start,
-      end,
-      text,
-      length: text.length,
-      offset:
-        arr
-          .slice(0, i)
-          .map(({ text }: { text: string }) => text)
-          .join(' ').length + (i === 0 ? 0 : 1),
-    }),
-  );
+  const items = aligned.map(({ start, end, text }, i: number, arr: any[]) => ({
+    start,
+    end,
+    text,
+    length: text.length,
+    offset:
+      arr
+        .slice(0, i)
+        .map(({ text }: { text: string }) => text)
+        .join(' ').length + (i === 0 ? 0 : 1),
+  }));
 
   callback && callback(items);
   return items;

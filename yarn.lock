@@ -252,10 +252,9 @@
     "@babel/helper-validator-identifier" "^7.18.6"
     to-fast-properties "^2.0.0"
 
-"@bbc/stt-align-node@1.4.3":
+"@bbc/stt-align-node@Laurian/stt-align-node#master":
   version "1.4.3"
-  resolved "https://registry.npmjs.org/@bbc/stt-align-node/-/stt-align-node-1.4.3.tgz"
-  integrity sha512-nIl6lhdFE41PVrRix6nvURQbs5dR6DKEDNFDbZwEkressvvOMuOp6deg/Q7G7pKUpfiVOCz7nTYs/XWDqZExtA==
+  resolved "https://codeload.github.com/Laurian/stt-align-node/tar.gz/e1acf1c2a58062a5d7659e874e09da1788e14b79"
   dependencies:
     babel-loader "^8.0.6"
     difflib "^0.2.4"

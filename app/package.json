@@ -13,7 +13,7 @@
     "node": "^14.18.0 || >=16.0.0"
   },
   "devDependencies": {
-    "@bbc/stt-align-node": "1.4.3",
+    "@bbc/stt-align-node": "Laurian/stt-align-node#master",
     "@emotion/react": "^11.10.4",
     "@emotion/styled": "^11.10.4",
     "@mui/icons-material": "^5.10.6",
