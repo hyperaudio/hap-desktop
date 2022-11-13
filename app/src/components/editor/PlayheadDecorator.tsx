@@ -16,7 +16,7 @@ const Root = styled('span')(({ theme }) => ({
   },
 }));
 
-const PlayheadSpan = ({ children }: { children: JSX.Element[] }) => {
+const PlayheadSpan = ({ children }: { children: JSX.Element[] }): JSX.Element => {
   return <Root className={classes.root}>{children}</Root>;
 };
 

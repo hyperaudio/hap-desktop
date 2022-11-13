@@ -100,12 +100,12 @@ const Root = styled(Box)(({ theme }) => ({
 
 interface EditorProps {
   initialState: EditorState;
-  playheadDecorator: typeof PlayheadDecorator;
-  decorators: CompositeDecorator[] | any[];
+  playheadDecorator: typeof PlayheadDecorator | undefined | null;
+  decorators?: CompositeDecorator[] | any[];
   time: number;
   seekTo: (time: number) => void;
-  showDialog: boolean;
-  aligner: (
+  showDialog?: boolean;
+  aligner?: (
     words: { [key: string]: any }[],
     text: string,
     start: number,
@@ -123,11 +123,11 @@ interface EditorProps {
     blocks: RawDraftContentBlock[];
     contentState: ContentState;
   }) => void;
-  autoScroll: boolean;
+  autoScroll?: boolean;
   play: () => void;
   playing: boolean;
   pause: () => void;
-  readOnly: boolean;
+  readOnly?: boolean;
 }
 
 const Editor = ({
@@ -137,7 +137,7 @@ const Editor = ({
   time = 0,
   seekTo,
   showDialog,
-  aligner = wordAligner,
+  aligner, // = wordAligner,
   speakers,
   setSpeakers,
   onChange: onChangeProp,
@@ -296,7 +296,7 @@ const Editor = ({
       if (typeof newValue === 'string') {
         // A: Create new by type-in and Enter press
         // const id = `S${Date.now()}`;
-        const id = 'S' + bs58.encode(Buffer.from(newValue.trim()));
+        const id = `S${bs58.encode(Buffer.from(newValue.trim()))}`;
         setSpeakers({ ...speakers, [id]: { name: newValue.trim(), id } });
         setSpeaker({ name: newValue.trim(), id });
         console.log('TODO: handleSpeakerSet, NEW-a:', newValue, id);
@@ -311,7 +311,7 @@ const Editor = ({
       } else if (newValue && newValue.inputValue) {
         // B: Create new by type-in and click on the `Add xyz` option
         // const id = `S${Date.now()}`;
-        const id = 'S' + bs58.encode(Buffer.from(newValue.inputValue.trim()));
+        const id = `S${bs58.encode(Buffer.from(newValue.inputValue.trim()))}`;
         setSpeakers({ ...speakers, [id]: { name: newValue.inputValue.trim(), id } });
         setSpeaker({ name: newValue.inputValue.trim(), id });
         console.log(`TODO: handleSpeakerSet, NEW-b:`, newValue.inputValue.trim(), id);
@@ -369,7 +369,7 @@ const Editor = ({
 
       return 'handled';
     },
-    [editorState],
+    [editorState, onChange],
   );
 
   const engine = useMemo(() => {
@@ -378,7 +378,7 @@ const Editor = ({
     return parser.getResult()?.engine?.name;
   }, []);
 
-  const wrapper = useRef<HTMLElement>();
+  const wrapper = useRef<HTMLDivElement>() as React.MutableRefObject<HTMLDivElement>;
   useEffect(() => {
     if (!autoScroll || (focused && !readOnly) || speakerAnchor) return;
 
@@ -395,7 +395,7 @@ const Editor = ({
     if (readOnly && engine === 'Blink') {
       playhead?.scrollIntoView();
     } else playhead?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, [autoScroll, wrapper, time, focused, speakerAnchor, readOnly]);
+  }, [autoScroll, wrapper, time, focused, speakerAnchor, readOnly, editorState, engine]);
 
   return (
     <Root
@@ -536,7 +536,7 @@ const BlockStyle = ({
   speakers: any;
   time: number;
   activeInterval?: any[];
-}) => {
+}): JSX.Element => {
   const theme = useTheme();
 
   const speaker = useMemo(() => speakers?.[block.getData().get('speaker')]?.name ?? '', [block, speakers]);
@@ -572,7 +572,7 @@ const Style = ({
   current: boolean;
   tc: string;
   intersects?: boolean;
-}) => (
+}): JSX.Element => (
   <style scoped>
     {`
       div[data-block='true'][data-offset-key="${blockKey}-0-0"] {
@@ -595,36 +595,36 @@ const Style = ({
   </style>
 );
 
-const timecode = (seconds = 0, frameRate = 25, dropFrame = false) =>
+const timecode = (seconds = 0, frameRate = 25, dropFrame = false): string =>
   TC(seconds * frameRate, frameRate as FRAMERATE, dropFrame)
     .toString()
     .split(':')
     .slice(0, 3)
     .join(':');
 
-const wordAligner = (
-  words: { [key: string]: any }[],
-  text: string,
-  start: number,
-  end: number,
-  callback?: (items: { start: number; end: number; text: string; length: number; offset: number }[]) => void,
-): { start: number; end: number; text: string; length: number; offset: number }[] => {
-  const aligned = alignSTTwithPadding({ words }, text, start, end);
+// const wordAligner = (
+//   words: { [key: string]: any }[],
+//   text: string,
+//   start: number,
+//   end: number,
+//   callback?: (items: { start: number; end: number; text: string; length: number; offset: number }[]) => void,
+// ): { start: number; end: number; text: string; length: number; offset: number }[] => {
+//   const aligned = alignSTTwithPadding({ words }, text, start, end);
 
-  const items = aligned.map(({ start, end, text }, i: number, arr: any[]) => ({
-    start,
-    end,
-    text,
-    length: text.length,
-    offset:
-      arr
-        .slice(0, i)
-        .map(({ text }: { text: string }) => text)
-        .join(' ').length + (i === 0 ? 0 : 1),
-  }));
+//   const items = aligned.map(({ start, end, text }, i: number, arr: any[]) => ({
+//     start,
+//     end,
+//     text,
+//     length: text.length,
+//     offset:
+//       arr
+//         .slice(0, i)
+//         .map(({ text }: { text: string }) => text)
+//         .join(' ').length + (i === 0 ? 0 : 1),
+//   }));
 
-  callback && callback(items);
-  return items;
-};
+//   callback && callback(items);
+//   return items;
+// };
 
 export default Editor;

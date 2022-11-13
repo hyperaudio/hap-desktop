@@ -1,55 +1,64 @@
 import React, { useState, useMemo, useRef, useCallback } from 'react';
+import { EditorState, ContentState, RawDraftContentBlock, convertFromRaw } from 'draft-js';
 
-import { Editor, EditorState, convertFromRaw, createEntityMap } from './components/editor';
+import { Editor, createEntityMap } from './components/editor';
+import Player from './components/player/Player';
+import sampleTranscript from './data/sampleTranscript.json';
 
 const Edit: React.FC = () => {
-  const [data, setData] = useState();
-  const [originalData, setOriginalData] = useState();
-  const [error, setError] = useState();
-  const [time, setTime] = useState(0);
-  const [speakers, setSpeakers] = useState({});
-  const [seekTime, setSeekTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [playing, setPlaying] = useState(false);
-  const [buffering, setBuffering] = useState(false);
-  const [pip, setPip] = useState(false);
+  const [url, setUrl] = useState('https://stream.hyper.audio/q3xsh/input/YCCJ4HtHr4jy2Dxxr5wf2U/video.mp4');
+  const [data, setData] = useState<{ speakers: { [key: string]: any }; blocks: RawDraftContentBlock[] }>({
+    speakers: sampleTranscript.speakers,
+    blocks: sampleTranscript.blocks.map(block => ({ ...block, type: 'paragraph', depth: 0 })),
+  });
+  const [error, setError] = useState<Error>();
 
+  const [speakers, setSpeakers] = useState({});
   const { blocks } = data ?? {};
+
   const initialState = useMemo(
-    () =>
-      blocks && EditorState.createWithContent(convertFromRaw({ blocks: blocks, entityMap: createEntityMap(blocks) })),
+    () => blocks && EditorState.createWithContent(convertFromRaw({ blocks, entityMap: createEntityMap(blocks) })),
     [blocks],
   );
 
-  const video = useRef();
-  const seekTo = useCallback(
-    time => {
-      // setSeekTime(time);
-      // if (video.current) video.current.seekTo(time, 'seconds');
+  const setDraft = useCallback(
+    (state: {
+      speakers: {
+        [key: string]: any;
+      };
+      blocks: RawDraftContentBlock[];
+      contentState: ContentState;
+    }) => {
+      console.log('TODO setDraft');
     },
-    [video],
+    [],
   );
 
+  const [time, setTime] = useState(0);
+
+  const noKaraoke = false; // FIXME
+  const seekTo = (time: number): void => {
+    console.log('TODO seekTo', time);
+  };
+  const [playing, setPlaying] = useState(false);
   const play = useCallback(() => setPlaying(true), []);
   const pause = useCallback(() => setPlaying(false), []);
 
-  const setDraft = () => {};
-  const noKaraoke = false;
-
   return (
     <div>
-      <p>Hello Electron + Vite + React!</p>
+      <Player {...{ url, playing, play, pause, setTime }} />
+      <hr />
       {initialState ? (
         <Editor
           {...{ initialState, time, seekTo, speakers, setSpeakers, playing, play, pause }}
-          autoScroll={true}
+          autoScroll
           onChange={setDraft}
           playheadDecorator={noKaraoke ? null : undefined}
         />
       ) : error ? (
         <p>Error: {error?.message}</p>
       ) : (
-        <p>Loading…</p>
+        <p>TODO skeleton loader</p>
       )}
     </div>
   );

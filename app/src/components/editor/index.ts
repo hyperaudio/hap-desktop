@@ -4,7 +4,7 @@ import Editor from './Editor';
 
 const flatten = (list: any[]): any[] => list.reduce((a, b) => a.concat(Array.isArray(b) ? flatten(b) : b), []);
 
-const createEntityMap = (blocks: RawDraftContentBlock[]) =>
+const createEntityMap = (blocks: RawDraftContentBlock[]): { [key: string]: any } =>
   flatten(blocks.map((block: RawDraftContentBlock) => block.entityRanges)).reduce(
     (acc: {[key: string]: any}, data: {[key: string]: any}) => ({
       ...acc,

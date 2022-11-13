@@ -207,7 +207,7 @@ const deferAlignment = (editorState: EditorState, changedEditorState: EditorStat
 
     // (items: [{[key: string]: any}]) => void
     const callback = () =>
-      aligner(items, text, start, end, (alignedItems: [{[key: string]: any}]) => {
+      aligner(items, text, start, end, (alignedItems: {[key: string]: any}[]) => {
         const textStart = alignedItems?.[0]?.start ?? start;
         const textEnd = alignedItems?.[alignedItems.length - 1]?.end ?? end;
 
