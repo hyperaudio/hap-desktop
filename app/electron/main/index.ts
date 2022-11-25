@@ -13,7 +13,7 @@ process.env.DIST = join(__dirname, '../..')
 process.env.PUBLIC = app.isPackaged ? process.env.DIST : join(process.env.DIST, '../public')
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true'
 
-import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron'
+import { app, BrowserWindow, Menu, shell, ipcMain, dialog } from 'electron'
 import { release } from 'os'
 import { join } from 'path'
 
@@ -28,6 +28,7 @@ if (!app.requestSingleInstanceLock()) {
   process.exit(0)
 }
 
+const isMac = process.platform === 'darwin'
 let win: BrowserWindow | null = null
 // Here, you can also use other preload
 const preload = join(__dirname, '../preload/index.js')
@@ -62,6 +63,112 @@ async function createWindow() {
     if (url.startsWith('https:')) shell.openExternal(url)
     return { action: 'deny' }
   })
+
+  Menu.setApplicationMenu(Menu.buildFromTemplate([
+    ...(isMac ? [{
+      label: app.name,
+      submenu: [
+        { role: 'about' },
+        { type: 'separator' },
+        { role: 'services' },
+        { type: 'separator' },
+        { role: 'hide' },
+        { role: 'hideOthers' },
+        { role: 'unhide' },
+        { type: 'separator' },
+        { role: 'quit' }
+      ]
+    }] : []),
+    {
+      label: 'File',
+      submenu: [
+        { label: 'New transcript', enabled: false },
+        { type: 'separator' },
+        { label: 'Open transcript', enabled: false },
+        { type: 'separator' },
+        { label: 'Save transcript', enabled: false},
+        { label: 'Save transcript as', enabled: false},
+      ],
+    },
+    {
+      label: 'Edit',
+      submenu: [
+        { role: 'undo' },
+        { role: 'redo' },
+        { type: 'separator' },
+        { role: 'cut' },
+        { role: 'copy' },
+        { role: 'paste' },
+        ...(isMac ? [
+          { role: 'pasteAndMatchStyle' },
+          { role: 'delete' },
+          { role: 'selectAll' },
+          { type: 'separator' },
+          {
+            label: 'Speech',
+            submenu: [
+              { role: 'startSpeaking' },
+              { role: 'stopSpeaking' }
+            ]
+          }
+        ] : [
+          { role: 'delete' },
+          { type: 'separator' },
+          { role: 'selectAll' }
+        ])
+      ]
+    },
+    {
+      label: 'View',
+      submenu: [
+        { role: 'reload' },
+        { role: 'forceReload' },
+        { role: 'toggleDevTools' },
+        { type: 'separator' },
+        { role: 'resetZoom' },
+        { role: 'zoomIn' },
+        { role: 'zoomOut' },
+        { type: 'separator' },
+        { role: 'togglefullscreen' }
+      ]
+    },
+    {
+      label: 'Window',
+      submenu: [
+        { role: 'minimize' },
+        { role: 'zoom' },
+        ...(isMac ? [
+          { type: 'separator' },
+          { role: 'front' },
+          { type: 'separator' },
+          { role: 'window' }
+        ] : [
+          { role: 'close' }
+        ])
+      ]
+    },
+    {
+      label: 'Export',
+      submenu: [
+        { label: 'Export transcript', enabled: false },
+        { label: 'Export transcript as', enabled: false },
+        { type: 'separator' },
+        { label: 'Export audio', enabled: false },
+        { label: 'Export audio as', enabled: false },
+      ]
+    },
+    {
+      role: 'help',
+      submenu: [
+        { label: 'Learn More' },
+        { label: 'Documentation' },
+        { label: 'Community Discussions' },
+        { label: 'Search Issues' },
+        { type: 'separator' },
+        { label: 'Report an Issue' },
+      ]
+    }
+  ]))
 }
 
 app.whenReady().then(createWindow)

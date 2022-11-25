@@ -3,9 +3,11 @@
     "Draftjs",
     "hyperaudio",
     "nodebuffer",
+    "Parens",
     "Playhead",
     "smpte",
     "timecode",
+    "togglefullscreen",
     "Twith",
     "undocked",
     "uuidv"
