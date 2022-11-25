@@ -1,15 +1,31 @@
+import {
+  ipcRenderer,
+  IpcRendererEvent,
+  OpenDialogOptions,
+  OpenDialogReturnValue,
+  SaveDialogOptions,
+  SaveDialogReturnValue,
+  FileFilter,
+} from 'electron';
+import { readFileSync, createWriteStream } from 'fs';
+import path from 'path';
+import JSZip from 'jszip';
+
 import React, { useState, useMemo, useRef, useCallback } from 'react';
 import { EditorState, ContentState, RawDraftContentBlock, convertFromRaw } from 'draft-js';
+import { v4 as uuidv4 } from 'uuid';
 
 import { Editor, createEntityMap } from './components/editor';
 import Player from './components/player/Player';
-import sampleTranscript from './data/sampleTranscript.json';
+// import sampleTranscript from './data/sampleTranscript.json';
 
 const Edit: React.FC = () => {
-  const [url, setUrl] = useState('https://stream.hyper.audio/q3xsh/input/YCCJ4HtHr4jy2Dxxr5wf2U/video.mp4');
-  const [data, setData] = useState<{ speakers: { [key: string]: any }; blocks: RawDraftContentBlock[] }>({
-    speakers: sampleTranscript.speakers,
-    blocks: sampleTranscript.blocks.map(block => ({ ...block, type: 'paragraph', depth: 0 })),
+  const [metadata, setMetadata] = useState<Record<string, any>>({ id: uuidv4() });
+  const [media, setMedia] = useState<Record<string, any>>({});
+  const [url, setUrl] = useState<string | undefined>(); // 'https://stream.hyper.audio/q3xsh/input/YCCJ4HtHr4jy2Dxxr5wf2U/video.mp4'
+  const [data, setData] = useState<{ speakers: { [key: string]: any } | null; blocks: RawDraftContentBlock[] | null }>({
+    speakers: null, // sampleTranscript.speakers,
+    blocks: null, // sampleTranscript.blocks.map(block => ({ ...block, type: 'paragraph', depth: 0 })),
   });
   const [error, setError] = useState<Error>();
 
@@ -21,18 +37,11 @@ const Edit: React.FC = () => {
     [blocks],
   );
 
-  const setDraft = useCallback(
-    (state: {
-      speakers: {
-        [key: string]: any;
-      };
-      blocks: RawDraftContentBlock[];
-      contentState: ContentState;
-    }) => {
-      console.log('TODO setDraft');
-    },
-    [],
-  );
+  const [draft, setDraft] = useState<{
+    speakers: { [key: string]: any };
+    blocks: RawDraftContentBlock[];
+    contentState: ContentState;
+  }>();
 
   const [time, setTime] = useState(0);
 
@@ -44,9 +53,78 @@ const Edit: React.FC = () => {
   const play = useCallback(() => setPlaying(true), []);
   const pause = useCallback(() => setPlaying(false), []);
 
+  const handleSave = useCallback(async () => {
+    const defaultPath = path.join(await homeDirectory(), 'test.hyperaudio');
+
+    const filePath =
+      (await (
+        await writeFile({
+          title: 'Save file as…',
+          defaultPath,
+          properties: ['createDirectory', 'showOverwriteConfirmation'],
+          filters: [
+            { name: 'Hyperaudio Files', extensions: ['hyperaudio'] },
+            { name: 'All Files', extensions: ['*'] },
+          ],
+        })
+      ).filePath) ?? defaultPath;
+
+    const zip = JSZip();
+    zip.file('metadata.json', JSON.stringify(metadata));
+    zip.file(`transcript/${metadata.id}.json`, JSON.stringify({ speakers, blocks: draft?.blocks ?? [] }));
+    Object.keys(media).forEach(id => zip.file(`media/${id}`, media[id].buffer));
+
+    await zip.generateNodeStream({ type: 'nodebuffer', streamFiles: true }).pipe(createWriteStream(filePath));
+
+    console.log({ filePath });
+  }, [metadata, media, speakers, draft]);
+
+  const handleOpen = useCallback(async () => {
+    const {
+      filePaths: [filePath],
+    } = await openFile({
+      title: 'Open Hyperaudio file…',
+      properties: ['openFile', 'promptToCreate', 'createDirectory'],
+      filters: [
+        { name: 'Hyperaudio Files', extensions: ['hyperaudio'] },
+        { name: 'All Files', extensions: ['*'] },
+      ],
+    });
+
+    const zip = await JSZip.loadAsync(readFileSync(filePath));
+    const media = await Promise.all(
+      zip.file(/^media\//).map(async file => ({
+        id: file.name.split('/').pop()?.split('.').reverse().pop(),
+        name: file.name,
+        buffer: await file.async('arraybuffer'),
+        url: URL.createObjectURL(await file.async('blob')),
+      })),
+    );
+
+    console.log({ media });
+    setUrl(media[0].url);
+    setMedia(media.reduce((acc, m) => ({ ...acc, [m.id ?? '0']: m }), {}));
+
+    const metadata = JSON.parse((await zip?.file('metadata.json')?.async('text')) ?? '{}');
+    const transcripts = await Promise.all(
+      zip.file(/^transcript\//).map(async file => ({
+        name: file.name,
+        data: JSON.parse((await file.async('text')) ?? '{}'),
+      })),
+    );
+
+    console.log({ metadata, transcripts });
+    setMetadata(metadata);
+    setData(transcripts[0].data as any);
+    setSpeakers(transcripts[0].data.speakers);
+  }, []);
+
   return (
     <div>
-      <Player {...{ url, playing, play, pause, setTime }} />
+      <button onClick={handleOpen}>Open</button>
+      <button onClick={handleSave}>Save</button>
+      <hr />
+      {url ? <Player {...{ url, playing, play, pause, setTime }} /> : null}
       <hr />
       {initialState ? (
         <Editor
@@ -63,5 +141,13 @@ const Edit: React.FC = () => {
     </div>
   );
 };
+
+const homeDirectory = (): Promise<string> => ipcRenderer.invoke('home-directory');
+
+const writeFile = (options: SaveDialogOptions): Promise<SaveDialogReturnValue> =>
+  ipcRenderer.invoke('write-file', options);
+
+const openFile = (options: OpenDialogOptions): Promise<OpenDialogReturnValue> =>
+  ipcRenderer.invoke('open-file', options);
 
 export default Edit;

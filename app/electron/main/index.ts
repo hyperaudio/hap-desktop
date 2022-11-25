@@ -13,7 +13,7 @@ process.env.DIST = join(__dirname, '../..')
 process.env.PUBLIC = app.isPackaged ? process.env.DIST : join(process.env.DIST, '../public')
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true'
 
-import { app, BrowserWindow, shell, ipcMain } from 'electron'
+import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron'
 import { release } from 'os'
 import { join } from 'path'
 
@@ -87,6 +87,10 @@ app.on('activate', () => {
     createWindow()
   }
 })
+
+ipcMain.handle('home-directory', () => app.getPath('home'));
+ipcMain.handle('write-file', (event, options) =>  dialog.showSaveDialog(BrowserWindow.fromWebContents(event.sender), options));
+ipcMain.handle('open-file', (event, options) => dialog.showOpenDialog(BrowserWindow.fromWebContents(event.sender), options));
 
 // new window example arg: new windows url
 ipcMain.handle('open-win', (event, arg) => {
