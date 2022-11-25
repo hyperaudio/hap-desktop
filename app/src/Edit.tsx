@@ -20,6 +20,10 @@ import Player from './components/player/Player';
 // import sampleTranscript from './data/sampleTranscript.json';
 
 const Edit: React.FC = () => {
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<Error>();
+
   const [metadata, setMetadata] = useState<Record<string, any>>({ id: uuidv4() });
   const [media, setMedia] = useState<Record<string, any>>({});
   const [url, setUrl] = useState<string | undefined>(); // 'https://stream.hyper.audio/q3xsh/input/YCCJ4HtHr4jy2Dxxr5wf2U/video.mp4'
@@ -27,7 +31,6 @@ const Edit: React.FC = () => {
     speakers: null, // sampleTranscript.speakers,
     blocks: null, // sampleTranscript.blocks.map(block => ({ ...block, type: 'paragraph', depth: 0 })),
   });
-  const [error, setError] = useState<Error>();
 
   const [speakers, setSpeakers] = useState({});
   const { blocks } = data ?? {};
@@ -54,75 +57,97 @@ const Edit: React.FC = () => {
   const pause = useCallback(() => setPlaying(false), []);
 
   const handleSave = useCallback(async () => {
-    const defaultPath = path.join(await homeDirectory(), 'test.hyperaudio');
+    setSaving(true);
+    try {
+      const defaultPath = path.join(await homeDirectory(), 'Untitled.hyperaudio');
 
-    const filePath =
-      (await (
-        await writeFile({
-          title: 'Save file as…',
-          defaultPath,
-          properties: ['createDirectory', 'showOverwriteConfirmation'],
-          filters: [
-            { name: 'Hyperaudio Files', extensions: ['hyperaudio'] },
-            { name: 'All Files', extensions: ['*'] },
-          ],
+      const filePath =
+        (await (
+          await writeFile({
+            title: 'Save Hyperaudio file as…',
+            defaultPath,
+            properties: ['createDirectory', 'showOverwriteConfirmation'],
+            filters: [
+              { name: 'Hyperaudio Files', extensions: ['hyperaudio'] },
+              { name: 'All Files', extensions: ['*'] },
+            ],
+          })
+        ).filePath) ?? defaultPath;
+
+      const zip = JSZip();
+      zip.file('metadata.json', JSON.stringify(metadata));
+      zip.file(`transcript/${metadata.id}.json`, JSON.stringify({ speakers, blocks: draft?.blocks ?? [] }));
+      Object.keys(media).forEach(id => zip.file(`media/${id}`, media[id].buffer));
+
+      let timeout = setTimeout(() => setSaving(false), 5000);
+      await zip
+        .generateNodeStream({ type: 'nodebuffer', streamFiles: true }, metadata => {
+          console.log('TODO progress', metadata);
+          clearTimeout(timeout);
+          timeout = setTimeout(() => setSaving(false), 5000);
         })
-      ).filePath) ?? defaultPath;
-
-    const zip = JSZip();
-    zip.file('metadata.json', JSON.stringify(metadata));
-    zip.file(`transcript/${metadata.id}.json`, JSON.stringify({ speakers, blocks: draft?.blocks ?? [] }));
-    Object.keys(media).forEach(id => zip.file(`media/${id}`, media[id].buffer));
-
-    await zip.generateNodeStream({ type: 'nodebuffer', streamFiles: true }).pipe(createWriteStream(filePath));
-
-    console.log({ filePath });
+        .pipe(createWriteStream(filePath));
+    } catch (error) {
+      setError(error as Error);
+      setSaving(false);
+    }
+    // setSaving(false);
   }, [metadata, media, speakers, draft]);
 
   const handleOpen = useCallback(async () => {
-    const {
-      filePaths: [filePath],
-    } = await openFile({
-      title: 'Open Hyperaudio file…',
-      properties: ['openFile', 'promptToCreate', 'createDirectory'],
-      filters: [
-        { name: 'Hyperaudio Files', extensions: ['hyperaudio'] },
-        { name: 'All Files', extensions: ['*'] },
-      ],
-    });
+    setLoading(true);
+    try {
+      const {
+        filePaths: [filePath],
+      } = await openFile({
+        title: 'Open Hyperaudio file…',
+        properties: ['openFile', 'promptToCreate', 'createDirectory'],
+        filters: [
+          { name: 'Hyperaudio Files', extensions: ['hyperaudio'] },
+          { name: 'All Files', extensions: ['*'] },
+        ],
+      });
 
-    const zip = await JSZip.loadAsync(readFileSync(filePath));
-    const media = await Promise.all(
-      zip.file(/^media\//).map(async file => ({
-        id: file.name.split('/').pop()?.split('.').reverse().pop(),
-        name: file.name,
-        buffer: await file.async('arraybuffer'),
-        url: URL.createObjectURL(await file.async('blob')),
-      })),
-    );
+      const zip = await JSZip.loadAsync(readFileSync(filePath));
+      const media = await Promise.all(
+        zip.file(/^media\//).map(async file => ({
+          id: file.name.split('/').pop()?.split('.').reverse().pop(),
+          name: file.name,
+          buffer: await file.async('arraybuffer'),
+          url: URL.createObjectURL(await file.async('blob')),
+        })),
+      );
 
-    console.log({ media });
-    setUrl(media[0].url);
-    setMedia(media.reduce((acc, m) => ({ ...acc, [m.id ?? '0']: m }), {}));
+      console.log({ media });
+      setUrl(media[0].url);
+      setMedia(media.reduce((acc, m) => ({ ...acc, [m.id ?? '0']: m }), {}));
 
-    const metadata = JSON.parse((await zip?.file('metadata.json')?.async('text')) ?? '{}');
-    const transcripts = await Promise.all(
-      zip.file(/^transcript\//).map(async file => ({
-        name: file.name,
-        data: JSON.parse((await file.async('text')) ?? '{}'),
-      })),
-    );
+      const metadata = JSON.parse((await zip?.file('metadata.json')?.async('text')) ?? '{}');
+      const transcripts = await Promise.all(
+        zip.file(/^transcript\//).map(async file => ({
+          name: file.name,
+          data: JSON.parse((await file.async('text')) ?? '{}'),
+        })),
+      );
 
-    console.log({ metadata, transcripts });
-    setMetadata(metadata);
-    setData(transcripts[0].data as any);
-    setSpeakers(transcripts[0].data.speakers);
+      console.log({ metadata, transcripts });
+      setMetadata(metadata);
+      setData(transcripts[0].data as any);
+      setSpeakers(transcripts[0].data.speakers);
+    } catch (error) {
+      setError(error as Error);
+    }
+    setLoading(false);
   }, []);
 
   return (
     <div>
-      <button onClick={handleOpen}>Open</button>
-      <button onClick={handleSave}>Save</button>
+      <button onClick={handleOpen} disabled={loading}>
+        {loading ? 'Opening…' : 'Open'}
+      </button>
+      <button onClick={handleSave} disabled={saving}>
+        {saving ? 'Saving…' : 'Save'}
+      </button>
       <hr />
       {url ? <Player {...{ url, playing, play, pause, setTime }} /> : null}
       <hr />
@@ -136,7 +161,7 @@ const Edit: React.FC = () => {
       ) : error ? (
         <p>Error: {error?.message}</p>
       ) : (
-        <p>TODO skeleton loader</p>
+        <p>{loading ? 'opening file / skeleton' : 'no file, please open one'}</p>
       )}
     </div>
   );
