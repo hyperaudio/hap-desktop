@@ -86,8 +86,8 @@ async function createWindow() {
         { type: 'separator' },
         { label: 'Open transcript', enabled: false },
         { type: 'separator' },
-        { label: 'Save transcript', enabled: false},
-        { label: 'Save transcript as', enabled: false},
+        { label: 'Save transcript', enabled: false },
+        { label: 'Save transcript as', enabled: false },
       ],
     },
     {
@@ -168,7 +168,7 @@ async function createWindow() {
         { label: 'Report an Issue' },
       ]
     }
-  ]))
+  ] as any))
 }
 
 app.whenReady().then(createWindow)
@@ -196,7 +196,7 @@ app.on('activate', () => {
 })
 
 ipcMain.handle('home-directory', () => app.getPath('home'));
-ipcMain.handle('write-file', (event, options) =>  dialog.showSaveDialog(BrowserWindow.fromWebContents(event.sender), options));
+ipcMain.handle('write-file', (event, options) => dialog.showSaveDialog(BrowserWindow.fromWebContents(event.sender), options));
 ipcMain.handle('open-file', (event, options) => dialog.showOpenDialog(BrowserWindow.fromWebContents(event.sender), options));
 
 // new window example arg: new windows url
