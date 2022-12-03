@@ -445,3 +445,6 @@ $RECYCLE.BIN/
 # .pnp.*
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,linux,windows,node,yarn,react,python,rust,visualstudiocode
+
+# Ignore test files
+test-files
