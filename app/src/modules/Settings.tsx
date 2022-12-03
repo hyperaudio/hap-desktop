@@ -1,9 +1,27 @@
-import { ReactElement, Ref, createRef, forwardRef, useState } from 'react';
+import { ReactElement, Ref, forwardRef, useState, useCallback } from 'react';
 
-import { Button, Dialog, DialogProps, Slide, Container } from '@mui/material';
+import {
+  AppBar,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogProps,
+  DialogTitle,
+  FormControl,
+  FormControlLabel,
+  IconButton,
+  Slide,
+  Switch,
+  Toolbar,
+} from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
+import CloseIcon from '@mui/icons-material/Close';
 
 import { SettingsI } from '../../typings';
+import { SettingsAtom } from '../state';
+import { useAtom } from 'jotai';
 
 const PREFIX = 'SettingsDialog';
 const classes = {
@@ -22,25 +40,52 @@ const Transition = forwardRef(function Transition(
 });
 
 export const SettingsDialog: React.FC<SettingsDialogProps> = ({ onClose, ...props }) => {
-  const paperRef = createRef<HTMLDivElement>();
+  const [settings, setSettings] = useAtom(SettingsAtom);
+
+  const onThemeChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => setSettings({ theme: e.target.checked ? 'dark' : 'light' }),
+    [setSettings],
+  );
+
+  console.log({ settings });
 
   return (
     <Dialog
-      {...props}
-      className={classes.root}
-      fullScreen
-      PaperProps={{
-        ref: paperRef,
-        sx: {},
-      }}
-      scroll="paper"
+      PaperProps={{ sx: { minHeight: '50vh' } }}
       TransitionComponent={Transition}
+      className={classes.root}
+      fullWidth
+      maxWidth="xs"
+      onClose={onClose}
+      {...props}
     >
       {props.open && (
-        <Container maxWidth="xs" sx={{ my: 2 }}>
-          Settings go here
-          <Button onClick={onClose}>Close</Button>
-        </Container>
+        <>
+          <AppBar position="absolute" color="transparent" elevation={0}>
+            <Toolbar sx={{ justifyContent: 'flex-end' }}>
+              <IconButton edge="end" onClick={onClose}>
+                <CloseIcon />
+              </IconButton>
+            </Toolbar>
+          </AppBar>
+          <DialogTitle>Settings</DialogTitle>
+          <DialogContent>
+            {/* <DialogContentText>General</DialogContentText> */}
+            <FormControl fullWidth>
+              <FormControlLabel
+                control={<Switch color="primary" checked={settings.theme === 'dark'} onChange={onThemeChange} />}
+                label="Dark mode"
+                labelPlacement="start"
+                sx={{ justifyContent: 'space-between', ml: 0 }}
+                value="start"
+              />
+            </FormControl>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={onClose}>Close</Button>
+            <Button>Do nothing</Button>
+          </DialogActions>
+        </>
       )}
     </Dialog>
   );
