@@ -17,12 +17,15 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Editor, createEntityMap } from './components/editor';
 import Player from './components/player/Player';
+import { useSettingsDialog } from './modules';
 // import sampleTranscript from './data/sampleTranscript.json';
 
 const Edit: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<Error>();
+
+  const [showSettings, settingsDialog] = useSettingsDialog();
 
   const [metadata, setMetadata] = useState<Record<string, any>>({ id: uuidv4() });
   const [media, setMedia] = useState<Record<string, any>>({});
@@ -148,6 +151,7 @@ const Edit: React.FC = () => {
       <button onClick={handleSave} disabled={saving}>
         {saving ? 'Saving…' : 'Save'}
       </button>
+      <button onClick={() => showSettings()}>Show Settings</button>
       <hr />
       {url ? <Player {...{ url, playing, play, pause, setTime }} /> : null}
       <hr />
@@ -163,6 +167,7 @@ const Edit: React.FC = () => {
       ) : (
         <p>{loading ? 'opening file / skeleton' : 'no file, please open one'}</p>
       )}
+      {settingsDialog}
     </div>
   );
 };
