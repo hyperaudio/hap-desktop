@@ -6,6 +6,9 @@ import { HashRouter, Routes, Route } from 'react-router-dom';
 import App from './App';
 import Settings from './Settings';
 import Edit from './Edit';
+
+import { Main as Layout } from './views';
+
 // import './samples/node-api'
 import 'styles/index.css';
 
@@ -14,9 +17,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <Provider>
       <HashRouter>
         <Routes>
-          <Route path="/" element={<App />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/edit" element={<Edit />} />
+          <Route path="/" element={<Layout />}>
+            <Route path="/" element={<App />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/edit" element={<Edit />} />
+          </Route>
         </Routes>
       </HashRouter>
     </Provider>
