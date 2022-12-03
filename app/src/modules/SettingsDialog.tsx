@@ -19,7 +19,7 @@ import {
 import { TransitionProps } from '@mui/material/transitions';
 import CloseIcon from '@mui/icons-material/Close';
 
-import { SettingsI } from '../../typings';
+import { SettingsI } from '../typings';
 import { SettingsAtom } from '../state';
 import { useAtom } from 'jotai';
 
