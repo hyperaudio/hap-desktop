@@ -1,13 +1,12 @@
-import { PropsWithChildren } from 'react';
+import { PropsWithChildren, useMemo } from 'react';
 import { useAtom } from 'jotai';
 
 import { AppBar, AppBarProps, Box, BoxProps, CssBaseline, Toolbar } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 
-import darkTheme from '../themes/darkTheme';
-import lightTheme from '../themes/lightTheme';
-
-import { SettingsAtom } from '../state';
+import { SettingsAtom } from '@/state';
+import { createMuiTheme } from '@/themes';
+import { SettingsI } from '@/typings';
 
 interface MainProps extends PropsWithChildren {}
 interface MainBodyProps extends BoxProps {}
@@ -33,12 +32,13 @@ export const MainFoot: React.FC<MainFootProps> = ({ children, ...props }) => {
 
 export const MainView: MainViewType = ({ children }) => {
   const [settings] = useAtom(SettingsAtom);
+
+  const theme = useMemo(() => createMuiTheme({ mode: settings.mode } as SettingsI), [settings, createMuiTheme]);
+
   return (
-    <ThemeProvider theme={settings.theme === 'dark' ? darkTheme : lightTheme}>
-      <>
-        <CssBaseline />
-        {children}
-      </>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      {children}
     </ThemeProvider>
   );
 };

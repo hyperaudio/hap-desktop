@@ -42,12 +42,10 @@ const Transition = forwardRef(function Transition(
 export const SettingsDialog: React.FC<SettingsDialogProps> = ({ onClose, ...props }) => {
   const [settings, setSettings] = useAtom(SettingsAtom);
 
-  const onThemeChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => setSettings({ theme: e.target.checked ? 'dark' : 'light' }),
+  const onModeChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => setSettings({ mode: e.target.checked ? 'dark' : 'light' }),
     [setSettings],
   );
-
-  console.log({ settings });
 
   return (
     <Dialog
@@ -73,7 +71,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ onClose, ...prop
             {/* <DialogContentText>General</DialogContentText> */}
             <FormControl fullWidth>
               <FormControlLabel
-                control={<Switch color="primary" checked={settings.theme === 'dark'} onChange={onThemeChange} />}
+                control={<Switch color="primary" checked={settings.mode === 'dark'} onChange={onModeChange} />}
                 label="Dark mode"
                 labelPlacement="start"
                 sx={{ justifyContent: 'space-between', ml: 0 }}
