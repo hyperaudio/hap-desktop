@@ -18,14 +18,7 @@ const App: React.FC = () => {
     <ThemeProvider theme={settings.theme === 'dark' ? darkTheme : lightTheme}>
       <CssBaseline />
       <div>
-        <header>
-          <p>
-            <Link to="/settings">Settings</Link>
-          </p>
-          <p>
-            <Link to="/edit">Edit</Link>
-          </p>
-        </header>
+        <Link to="/edit">Edit</Link>
       </div>
     </ThemeProvider>
   );
