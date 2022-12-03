@@ -3,8 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { Provider } from 'jotai';
 import { HashRouter, Routes, Route } from 'react-router-dom';
 
-import App from './App';
-import Edit from './Edit';
+import { EditPage } from './pages';
 
 // import './samples/node-api'
 
@@ -13,8 +12,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <Provider>
       <HashRouter>
         <Routes>
-          <Route path="/" element={<App />} />
-          <Route path="/edit" element={<Edit />} />
+          <Route path="*" element={<EditPage />} />
         </Routes>
       </HashRouter>
     </Provider>

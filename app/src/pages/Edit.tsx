@@ -15,14 +15,14 @@ import React, { useState, useMemo, useRef, useCallback } from 'react';
 import { EditorState, ContentState, RawDraftContentBlock, convertFromRaw } from 'draft-js';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Editor, createEntityMap } from './components/editor';
-import Player from './components/player/Player';
-import { StatusBar } from './modules';
+import { Editor, createEntityMap } from '../components/editor';
+import Player from '../components/player/Player';
+import { StatusBar } from '../modules';
 import { Link } from 'react-router-dom';
-import { MainView } from './views';
+import { MainView } from '../views';
 // import sampleTranscript from './data/sampleTranscript.json';
 
-const Edit: React.FC = () => {
+export const EditPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<Error>();
@@ -146,7 +146,6 @@ const Edit: React.FC = () => {
   return (
     <MainView>
       <MainView.Body>
-        <Link to="/">HOme</Link>
         <button onClick={handleOpen} disabled={loading}>
           {loading ? 'Opening…' : 'Open'}
         </button>
@@ -184,4 +183,4 @@ const writeFile = (options: SaveDialogOptions): Promise<SaveDialogReturnValue> =
 const openFile = (options: OpenDialogOptions): Promise<OpenDialogReturnValue> =>
   ipcRenderer.invoke('open-file', options);
 
-export default Edit;
+export default EditPage;
