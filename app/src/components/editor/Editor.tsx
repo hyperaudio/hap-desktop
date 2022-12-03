@@ -18,13 +18,7 @@ import { intersection, arrayIntersection } from 'interval-operations';
 import UAParser from 'ua-parser-js';
 
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
-import ClickAwayListener from '@mui/material/ClickAwayListener';
-import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
-import Popover from '@mui/material/Popover';
-import Popper from '@mui/material/Popper';
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
+import { Box, ClickAwayListener, Paper, Popover, Popper, TextField, Typography } from '@mui/material';
 import { styled, useTheme } from '@mui/material/styles';
 
 import PlayheadDecorator from './PlayheadDecorator';
