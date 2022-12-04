@@ -3,8 +3,8 @@
  */
 {
   appId: 'YourAppID',
-  productName: 'YourAppName',
-  copyright: 'Copyright © 2022 ${author}',
+  productName: 'Hyperaudio-Desktop',
+  copyright: 'Copyright © 2022 Hyperaudio',
   asar: true,
   directories: {
     output: 'release/${version}',
@@ -35,4 +35,5 @@
     target: ['AppImage', 'deb'],
     artifactName: '${productName}-Linux-${version}.${ext}',
   },
+  electronVersion: '20.2.0',
 }
