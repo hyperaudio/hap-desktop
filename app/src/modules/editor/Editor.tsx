@@ -434,7 +434,15 @@ export const Editor = ({
               clearOnBlur
               disableClearable
               disablePortal
-              PopperComponent={props => <Popper {...props} sx={{ transform: 'translateX(0)' }} />}
+              PopperComponent={props => (
+                <Popper
+                  nonce={undefined}
+                  onResize={undefined}
+                  onResizeCapture={undefined}
+                  {...props}
+                  sx={{ transform: 'translateX(0)' }}
+                />
+              )}
               PaperComponent={props => (
                 <Paper
                   {...props}

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useCallback, useEffect, useLayoutEffect } from 'react';
+import React, { useState, useMemo, useRef, useCallback, useEffect, useLayoutEffect, MutableRefObject } from 'react';
 import {
   FileFilter,
   IpcRendererEvent,
@@ -294,7 +294,7 @@ export const EditPage: React.FC = () => {
 
   const noKaraoke = false;
 
-  const div = useRef<HTMLDivElement>();
+  const div = useRef<HTMLDivElement>() as MutableRefObject<HTMLDivElement>;
   const [top, setTop] = useState(500);
 
   useLayoutEffect(() => {

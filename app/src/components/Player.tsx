@@ -15,6 +15,7 @@ import Tooltip from '@mui/material/Tooltip';
 import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 import { styled } from '@mui/material/styles';
+import { isArray } from 'lodash';
 
 const PREFIX = 'EditorPage';
 const CONTROLS_HEIGHT = 60;
@@ -24,6 +25,7 @@ const classes = {
   editor: `${PREFIX}-editor`,
   paneTitle: `${PREFIX}-paneTitle`,
   player: `${PREFIX}-player`,
+  playerWrapper: `${PREFIX}-playerWrapper`,
   root: `${PREFIX}-root`,
   stage: `${PREFIX}-stage`,
   theatre: `${PREFIX}-theatre`,
@@ -90,7 +92,8 @@ export const Player = ({
   const onBufferEnd = useCallback(() => setBuffering(false), []);
 
   const handleSliderChange = useCallback(
-    (event: any, value: number) => {
+    (event: Event, value: number | number[], activeThumb: number): void => {
+      if (isArray(value)) return;
       setSeekTime(value);
       if (ref.current) ref.current.seekTo(value, 'seconds');
     },
