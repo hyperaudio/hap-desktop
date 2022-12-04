@@ -18,7 +18,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { Editor, createEntityMap } from '../components/editor';
 import Player from '../components/player/Player';
 import { StatusBar } from '../modules';
-import { Link } from 'react-router-dom';
 import { MainView } from '../views';
 // import sampleTranscript from './data/sampleTranscript.json';
 
@@ -144,34 +143,27 @@ export const EditPage: React.FC = () => {
   }, []);
 
   return (
-    <MainView>
-      <MainView.Body>
-        <button onClick={handleOpen} disabled={loading}>
-          {loading ? 'Opening…' : 'Open'}
-        </button>
-        <button onClick={handleSave} disabled={saving}>
-          {saving ? 'Saving…' : 'Save'}
-        </button>
-        <hr />
-        {url ? <Player {...{ url, playing, play, pause, setTime }} /> : null}
-        <hr />
-        {initialState ? (
-          <Editor
-            {...{ initialState, time, seekTo, speakers, setSpeakers, playing, play, pause }}
-            autoScroll
-            onChange={setDraft}
-            playheadDecorator={noKaraoke ? null : undefined}
-          />
-        ) : error ? (
-          <p>Error: {error?.message}</p>
-        ) : (
-          <p>{loading ? 'opening file / skeleton' : 'no file, please open one'}</p>
-        )}
-      </MainView.Body>
-      <MainView.Foot>
-        <StatusBar />
-      </MainView.Foot>
-    </MainView>
+    <div>
+      <button onClick={handleOpen} disabled={loading}>
+        {loading ? 'Opening…' : 'Open'}
+      </button>
+      <button onClick={handleSave} disabled={saving}>
+        {saving ? 'Saving…' : 'Save'}
+      </button>
+      {url ? <Player {...{ url, playing, play, pause, setTime }} /> : null}
+      {initialState ? (
+        <Editor
+          {...{ initialState, time, seekTo, speakers, setSpeakers, playing, play, pause }}
+          autoScroll
+          onChange={setDraft}
+          playheadDecorator={noKaraoke ? null : undefined}
+        />
+      ) : error ? (
+        <p>Error: {error?.message}</p>
+      ) : (
+        <p>{loading ? 'opening file / skeleton' : 'no file, please open one'}</p>
+      )}
+    </div>
   );
 };
 

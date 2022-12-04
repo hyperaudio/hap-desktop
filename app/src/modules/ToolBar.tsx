@@ -1,0 +1,48 @@
+import { IconButton, List, ListItem, Tooltip } from '@mui/material';
+import FileOpenIcon from '@mui/icons-material/FileOpen';
+import SettingsIcon from '@mui/icons-material/Settings';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+
+import { useSettingsDialog } from '@/modules';
+import { Stack } from '@mui/system';
+
+interface ToolBarProps {}
+
+export const ToolBar: React.FC<ToolBarProps> = ({ ...props }) => {
+  const [showSettings, settingsDialog] = useSettingsDialog();
+
+  return (
+    <>
+      <Stack direction="column" justifyContent="space-between" spacing={1} sx={{ height: '100%' }}>
+        <List component={Stack} spacing={1}>
+          <ListItem disablePadding sx={{ display: 'block', textAlign: 'center' }}>
+            <Tooltip arrow title="Open file…" placement="right">
+              <IconButton size="small" onClick={() => alert('Lemme open a file from here!')}>
+                <FileOpenIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </ListItem>
+        </List>
+        <List component={Stack} spacing={1}>
+          <ListItem disablePadding sx={{ display: 'block', textAlign: 'center' }}>
+            <Tooltip arrow title="About" placement="right">
+              <IconButton size="small" onClick={() => alert('Lemme learn more about the app!')}>
+                <HelpOutlineIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </ListItem>
+          <ListItem disablePadding sx={{ display: 'block', textAlign: 'center' }}>
+            <Tooltip arrow title="Settings" placement="right">
+              <IconButton size="small" onClick={() => showSettings()}>
+                <SettingsIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </ListItem>
+        </List>
+      </Stack>
+      {settingsDialog}
+    </>
+  );
+};
+
+export default ToolBar;

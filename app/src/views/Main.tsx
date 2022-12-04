@@ -1,49 +1,71 @@
+import { Outlet } from 'react-router-dom';
 import { PropsWithChildren, useMemo } from 'react';
 import { useAtom } from 'jotai';
 
-import { AppBar, AppBarProps, Box, BoxProps, CssBaseline, Toolbar } from '@mui/material';
+import { AppBar, Box, CssBaseline, Color, Drawer, PaletteMode, Toolbar } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 
-import { SettingsAtom } from '@/state';
+import { StatusBar, ToolBar } from '@/modules';
 import { createMuiTheme } from '@/themes';
-import { SettingsI } from '@/typings';
+import { settingsModeAtom, settingsColorAtom } from '@/state';
 
-interface MainProps extends PropsWithChildren {}
-interface MainBodyProps extends BoxProps {}
-interface MainFootProps extends AppBarProps {}
-interface MainViewType extends React.FC<MainProps> {
-  Body: React.FC<MainBodyProps>;
-  Foot: React.FC<MainFootProps>;
-}
+export const MainView: React.FC<PropsWithChildren> = () => {
+  const [mode] = useAtom(settingsModeAtom);
+  const [color] = useAtom(settingsColorAtom);
 
-export const MainBody: React.FC<MainBodyProps> = ({ ...props }) => {
-  return <Box {...props} />;
-};
-export const MainFoot: React.FC<MainFootProps> = ({ children, ...props }) => {
-  return (
-    <>
-      <AppBar {...props} position="fixed" color="transparent" sx={{ bottom: 0, top: 'auto' }}>
-        <Toolbar variant="dense">{children}</Toolbar>
-      </AppBar>
-      <Toolbar variant="dense" />
-    </>
+  const theme = useMemo(
+    () => createMuiTheme({ mode: mode as PaletteMode, color: color as Color }),
+    [color, mode, createMuiTheme],
   );
-};
 
-export const MainView: MainViewType = ({ children }) => {
-  const [settings] = useAtom(SettingsAtom);
-
-  const theme = useMemo(() => createMuiTheme({ mode: settings.mode } as SettingsI), [settings, createMuiTheme]);
+  const SIDE_WIDTH = useMemo(() => `calc(${theme.spacing(6)} + 1px)`, [theme]);
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      {children}
+      <Box sx={{ display: 'flex' }}>
+        <Drawer
+          open
+          sx={{
+            flexShrink: 0,
+            whiteSpace: 'nowrap',
+            boxSizing: 'border-box',
+            overflowX: 'hidden',
+            width: SIDE_WIDTH,
+            '& .MuiDrawer-paper': {
+              width: SIDE_WIDTH,
+              overflowX: 'hidden',
+            },
+          }}
+          variant="permanent"
+        >
+          <ToolBar />
+        </Drawer>
+        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+          <Outlet />
+          <Toolbar variant="dense" />
+        </Box>
+      </Box>
+      <AppBar
+        component="footer"
+        elevation={0}
+        position="fixed"
+        sx={theme => ({
+          bgcolor: 'background.paper',
+          borderTop: `1px solid ${theme.palette.divider}`,
+          bottom: 0,
+          left: SIDE_WIDTH,
+          right: 0,
+          top: 'auto',
+          width: 'auto',
+        })}
+      >
+        <Toolbar variant="dense">
+          <StatusBar />
+        </Toolbar>
+      </AppBar>
     </ThemeProvider>
   );
 };
-
-MainView.Body = MainBody;
-MainView.Foot = MainFoot;
 
 export default MainView;

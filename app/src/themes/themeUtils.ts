@@ -1,21 +1,21 @@
+import { Color, PaletteMode } from '@mui/material';
 import { createTheme } from '@mui/material/styles';
+import { deepPurple } from '@mui/material/colors';
 
 import InterBold from '@/assets/fonts/Inter/Inter-Bold.woff2';
 import InterItalic from '@/assets/fonts/Inter/Inter-Italic.woff2';
 import InterMedium from '@/assets/fonts/Inter/Inter-Medium.woff2';
 import InterRegular from '@/assets/fonts/Inter/Inter-Regular.woff2';
 
-import { colors } from '@/config';
-
 interface createMuiThemeProps {
-  color?: keyof typeof colors;
-  mode?: 'light' | 'dark';
+  color?: Color;
+  mode?: PaletteMode;
 }
 
 const rootTheme = createTheme({});
 
 export const createMuiTheme = (payload: createMuiThemeProps) => {
-  const { mode = 'light' } = payload;
+  const { mode = 'light', color = deepPurple } = payload;
   return createTheme({
     ...rootTheme,
     components: {
@@ -67,6 +67,7 @@ export const createMuiTheme = (payload: createMuiThemeProps) => {
     },
     palette: {
       mode,
+      primary: color,
     },
     typography: {
       fontFamily: 'Inter, Helvetica, Arial, sans-serif',

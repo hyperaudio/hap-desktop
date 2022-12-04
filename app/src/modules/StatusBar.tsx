@@ -1,15 +1,9 @@
-import { useSettingsDialog } from '.';
+import { Box, BoxProps } from '@mui/material';
 
-interface StatusBarProps {}
+interface StatusBarProps extends BoxProps {}
 
 export const StatusBar: React.FC<StatusBarProps> = ({ ...props }) => {
-  const [showSettings, settingsDialog] = useSettingsDialog();
-  return (
-    <>
-      <button onClick={() => showSettings()}>Show Settings</button>
-      {settingsDialog}
-    </>
-  );
+  return <Box sx={theme => ({ ...theme.typography.caption })}>Status bar goes here</Box>;
 };
 
 export default StatusBar;

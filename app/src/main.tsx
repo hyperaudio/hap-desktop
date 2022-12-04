@@ -4,6 +4,7 @@ import { Provider } from 'jotai';
 import { HashRouter, Routes, Route } from 'react-router-dom';
 
 import { EditPage } from './pages';
+import { MainView } from './views';
 
 // import './samples/node-api'
 
@@ -12,7 +13,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <Provider>
       <HashRouter>
         <Routes>
-          <Route path="*" element={<EditPage />} />
+          <Route element={<MainView />}>
+            <Route path="*" element={<EditPage />} />
+          </Route>
         </Routes>
       </HashRouter>
     </Provider>

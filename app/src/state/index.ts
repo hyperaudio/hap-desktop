@@ -1,1 +1,1 @@
-export * from './SettingsAtom';
+export * from './SettingsAtoms';
