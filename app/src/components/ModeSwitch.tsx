@@ -26,41 +26,25 @@ export const ModeSwitch: React.FC<ModeSwitchProps> = ({ ...props }) => {
   return (
     <>
       <Button
-        id="color-button"
+        {...props}
+        id="mode-button"
         aria-controls={open ? 'mode-menu' : undefined}
         aria-haspopup="true"
         aria-expanded={open ? 'true' : undefined}
         onClick={onOpen}
-        sx={{
-          minWidth: 'auto',
-          pl: 1.5,
-          '& .MuiButton-endIcon': { ml: 0.1 },
-          '& .MuiButton-startIcon': { mr: 0.1 },
-        }}
         endIcon={<ArrowDropDownIcon sx={{ color: 'text.secondary' }} />}
-        {...props}
       >
         {find(modes, o => o.value === mode)?.label}
       </Button>
       <Menu
-        id="mode-menu"
+        MenuListProps={{ 'aria-labelledby': 'mode-button', dense: true }}
         anchorEl={anchorEl}
-        open={open}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        id="mode-menu"
         onClose={onClose}
-        MenuListProps={{
-          'aria-labelledby': 'color-button',
-          dense: true,
-          sx: {},
-        }}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
+        open={open}
         sx={{ '& .MuiBackdrop-root': { background: 'none', backdropFilter: 'none' } }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         variant="selectedMenu"
       >
         {modes.map((o: { label: string; value: PaletteMode }) => (

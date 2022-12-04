@@ -2,36 +2,13 @@ import { useState } from 'react';
 import { isEqual } from 'lodash';
 import { useAtom } from 'jotai';
 
-import { ButtonProps, Box, BoxProps, Color, Menu, MenuItem, IconButton } from '@mui/material';
+import { Color, Menu, IconButton, IconButtonProps, ListItem } from '@mui/material';
+import CircleIcon from '@mui/icons-material/Circle';
 
 import { colors } from '@/config';
 import { settingsColorAtom } from '@/state';
 
-interface ColorSwitchProps extends ButtonProps {}
-
-interface ColorSampleProps extends Omit<BoxProps, 'color'> {
-  color: Color;
-  size?: 'small' | 'medium' | 'large';
-}
-
-const ColorSample: React.FC<ColorSampleProps> = ({ color, size = 'medium', ...props }) => {
-  const sizes = {
-    small: 2,
-    medium: 2.5,
-    large: 3,
-  };
-  return (
-    <Box
-      {...props}
-      sx={theme => ({
-        background: color[500],
-        borderRadius: theme.shape.borderRadius,
-        height: theme.spacing(sizes[size]),
-        width: theme.spacing(sizes[size]),
-      })}
-    />
-  );
-};
+interface ColorSwitchProps extends IconButtonProps {}
 
 export const ColorSwitch: React.FC<ColorSwitchProps> = ({ ...props }) => {
   const [color, setColor] = useAtom(settingsColorAtom);
@@ -49,60 +26,57 @@ export const ColorSwitch: React.FC<ColorSwitchProps> = ({ ...props }) => {
   return (
     <>
       <IconButton
-        id="color-button"
-        aria-controls={open ? 'color-menu' : undefined}
-        aria-haspopup="true"
-        aria-expanded={open ? 'true' : undefined}
-        onClick={onOpen}
-        size="medium"
         {...props}
+        aria-controls={open ? 'color-menu' : undefined}
+        aria-expanded={open ? 'true' : undefined}
+        aria-haspopup="true"
+        id="color-button"
+        onClick={onOpen}
+        size="large"
+        sx={theme => ({
+          height: 'auto',
+          lineHeight: '0',
+          textAlign: 'center',
+          width: 'auto',
+        })}
       >
-        <ColorSample color={color} size="large" />
+        <CircleIcon fontSize="large" sx={{ color: color[500] }} />
       </IconButton>
       <Menu
-        id="color-menu"
-        anchorEl={anchorEl}
-        open={open}
-        onClose={onClose}
         MenuListProps={{
           'aria-labelledby': 'color-button',
           dense: true,
           sx: {
+            alignContent: 'flex-start',
+            alignItems: 'flex-start',
             display: 'flex',
             flexWrap: 'wrap',
+            width: '170px',
+            justifyContent: 'flex-start',
             px: 1,
             '& > *': {
-              flex: '1 1 25%',
+              flex: `0 0 30px`,
+              height: '30px',
             },
           },
         }}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
+        anchorEl={anchorEl}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        id="color-menu"
+        onClose={onClose}
+        open={open}
         sx={{ '& .MuiBackdrop-root': { background: 'none', backdropFilter: 'none' } }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-        variant="selectedMenu"
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
         {colors.map((c: Color) => (
-          <MenuItem
-            key={c[500]}
-            selected={isEqual(c, color)}
-            onClick={() => onSelect(c)}
-            sx={theme => ({
-              borderRadius: theme.shape.borderRadius,
-              height: 'auto',
-              justifyContent: 'center',
-              m: 0,
-              p: 0,
-              width: 'auto',
-            })}
-          >
-            <ColorSample color={c} size="small" />
-          </MenuItem>
+          <ListItem key={c[500]} sx={{ justifyContent: 'center', m: 0, p: 0 }}>
+            <IconButton
+              onClick={() => onSelect(c)}
+              sx={theme => ({ bgcolor: isEqual(c, color) ? theme.palette.action.hover : 'transparent' })}
+            >
+              <CircleIcon fontSize="small" sx={{ color: c[500] }} />
+            </IconButton>
+          </ListItem>
         ))}
       </Menu>
     </>

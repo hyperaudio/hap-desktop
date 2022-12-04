@@ -1,4 +1,42 @@
 import { Color } from '@mui/material';
-import { red, purple, deepPurple, indigo, blue, deepOrange, brown, blueGrey } from '@mui/material/colors';
+import {
+  red,
+  pink,
+  purple,
+  deepPurple,
+  indigo,
+  blue,
+  lightBlue,
+  cyan,
+  teal,
+  green,
+  lightGreen,
+  lime,
+  yellow,
+  amber,
+  orange,
+  deepOrange,
+  brown,
+  blueGrey,
+} from '@mui/material/colors';
 
-export const colors: Color[] = [red, purple, deepPurple, indigo, blue, deepOrange, brown, blueGrey];
+export const colors: Color[] = [
+  red,
+  pink,
+  purple,
+  deepPurple,
+  indigo,
+  blue,
+  lightBlue,
+  cyan,
+  teal,
+  green,
+  lightGreen,
+  lime,
+  yellow,
+  amber,
+  orange,
+  deepOrange,
+  brown,
+  blueGrey,
+];

@@ -1,28 +1,20 @@
 import { ReactElement, Ref, forwardRef, useState, useCallback } from 'react';
-import { isEqual } from 'lodash';
-import { useAtom } from 'jotai';
 
 import {
   AppBar,
-  Color,
   Dialog,
   DialogContent,
   DialogProps,
-  Avatar,
   DialogTitle,
-  FormControl,
-  FormControlLabel,
   IconButton,
-  Slide,
-  Stack,
-  Switch,
+  List,
+  ListItem,
+  ListItemText,
   Toolbar,
 } from '@mui/material';
-import { TransitionProps } from '@mui/material/transitions';
 import CloseIcon from '@mui/icons-material/Close';
 
-import { colors } from '@/config';
-import { settingsModeAtom, settingsColorAtom } from '@/state';
+import { ColorSwitch, ModeSwitch } from '@/components';
 
 const PREFIX = 'SettingsDialog';
 const classes = {
@@ -33,31 +25,13 @@ interface SettingsDialogProps extends DialogProps {
   onClose: () => void;
 }
 
-const Transition = forwardRef(function Transition(
-  props: TransitionProps & { children: ReactElement },
-  ref: Ref<unknown>,
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
-
 export const SettingsDialog: React.FC<SettingsDialogProps> = ({ onClose, ...props }) => {
-  const [mode, setMode] = useAtom(settingsModeAtom);
-  const [color, setColor] = useAtom(settingsColorAtom);
-
-  const onModeChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => setMode(e.target.checked ? 'dark' : 'light'),
-    [setMode],
-  );
-
-  const onColorChange = useCallback((c: Color) => setColor(c), [setColor]);
-
   return (
     <Dialog
       PaperProps={{ sx: { minHeight: '50vh' } }}
-      TransitionComponent={Transition}
       className={classes.root}
       fullWidth
-      maxWidth="xs"
+      maxWidth="sm"
       onClose={onClose}
       {...props}
     >
@@ -73,40 +47,17 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ onClose, ...prop
           <DialogTitle>Settings</DialogTitle>
           <DialogContent>
             {/* <DialogContentText>General</DialogContentText> */}
-            <FormControl fullWidth>
-              <FormControlLabel
-                control={<Switch color="primary" checked={mode === 'dark'} onChange={onModeChange} />}
-                label="Dark mode"
-                labelPlacement="start"
-                sx={{ justifyContent: 'space-between', ml: 0 }}
-                value="start"
-              />
-            </FormControl>
-            <FormControl fullWidth>
-              <FormControlLabel
-                control={
-                  <Stack direction="row" spacing={0.5}>
-                    {colors.map((c: Color) => (
-                      <IconButton disabled={isEqual(c, color)} key={c[500]} onClick={() => onColorChange(c)}>
-                        <Avatar
-                          sx={theme => ({
-                            bgcolor: c[500],
-                            height: theme.spacing(2.22),
-                            width: theme.spacing(2.22),
-                          })}
-                        >
-                          {' '}
-                        </Avatar>
-                      </IconButton>
-                    ))}
-                  </Stack>
-                }
-                label="Color"
-                labelPlacement="start"
-                sx={{ alignItems: 'center', justifyContent: 'space-between', ml: 0 }}
-                value="start"
-              />
-            </FormControl>
+            <List>
+              <ListItem divider disableGutters secondaryAction={<ModeSwitch />}>
+                <ListItemText primary="Base color scheme" secondary="Choose base color scheme"></ListItemText>
+              </ListItem>
+              <ListItem disableGutters secondaryAction={<ColorSwitch />}>
+                <ListItemText
+                  primary="Accent color"
+                  secondary="Choose the accent color used throughout the app"
+                ></ListItemText>
+              </ListItem>
+            </List>
           </DialogContent>
         </>
       )}
