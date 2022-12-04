@@ -570,7 +570,7 @@ const Style = ({
   <style scoped>
     {`
       div[data-block='true'][data-offset-key="${blockKey}-0-0"] {
-        color: ${played ? theme.palette.text.disabled : theme.palette.common.black};
+        color: ${played ? theme.palette.text.disabled : theme.palette.text.primary};
         border-radius: 10px;
       }
       .Right div[data-block='true'][data-offset-key="${blockKey}-0-0"] {

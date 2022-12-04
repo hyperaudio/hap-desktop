@@ -23,7 +23,7 @@ export const MainView: React.FC<PropsWithChildren> = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Paper sx={{ display: 'flex', minHeight: '100vh' }}>
+      <Paper sx={{ borderRadius: 0, height: '100vh' }}>
         <Drawer
           open
           sx={{
@@ -41,7 +41,7 @@ export const MainView: React.FC<PropsWithChildren> = () => {
         >
           <ToolBar />
         </Drawer>
-        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+        <Box component="main" sx={{ bottom: 0, left: SIDE_WIDTH, p: 3, position: 'fixed', right: 0, top: 0 }}>
           <Outlet />
           <Toolbar variant="dense" />
         </Box>
@@ -51,10 +51,11 @@ export const MainView: React.FC<PropsWithChildren> = () => {
         elevation={0}
         position="fixed"
         sx={theme => ({
-          bgcolor: 'background.paper',
-          borderTop: `1px solid ${theme.palette.divider}`,
+          // borderTop: `1px solid ${theme.palette.divider}`,
+          bgcolor: 'transparent',
           bottom: 0,
           left: SIDE_WIDTH,
+          pointerEvents: 'none',
           right: 0,
           top: 'auto',
           width: 'auto',
