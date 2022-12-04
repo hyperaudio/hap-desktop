@@ -64,6 +64,16 @@ export const createMuiTheme = (payload: createMuiThemeProps) => {
           },
         },
       },
+      MuiIconButton: {
+        defaultProps: {
+          size: 'small',
+        },
+      },
+      MuiSvgIcon: {
+        defaultProps: {
+          fontSize: 'small',
+        },
+      },
     },
     palette: {
       mode,

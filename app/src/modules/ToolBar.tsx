@@ -17,8 +17,8 @@ export const ToolBar: React.FC<ToolBarProps> = ({ ...props }) => {
         <List component={Stack} spacing={1}>
           <ListItem disablePadding sx={{ display: 'block', textAlign: 'center' }}>
             <Tooltip arrow title="Open file…" placement="right">
-              <IconButton size="small" onClick={() => alert('Lemme open a file from here!')}>
-                <FileOpenIcon fontSize="small" />
+              <IconButton onClick={() => alert('Lemme open a file from here!')}>
+                <FileOpenIcon />
               </IconButton>
             </Tooltip>
           </ListItem>
@@ -26,15 +26,15 @@ export const ToolBar: React.FC<ToolBarProps> = ({ ...props }) => {
         <List component={Stack} spacing={1}>
           <ListItem disablePadding sx={{ display: 'block', textAlign: 'center' }}>
             <Tooltip arrow title="About" placement="right">
-              <IconButton size="small" onClick={() => alert('Lemme learn more about the app!')}>
-                <HelpOutlineIcon fontSize="small" />
+              <IconButton onClick={() => alert('Lemme learn more about the app!')}>
+                <HelpOutlineIcon />
               </IconButton>
             </Tooltip>
           </ListItem>
           <ListItem disablePadding sx={{ display: 'block', textAlign: 'center' }}>
             <Tooltip arrow title="Settings" placement="right">
-              <IconButton size="small" onClick={() => showSettings()}>
-                <SettingsIcon fontSize="small" />
+              <IconButton onClick={() => showSettings()}>
+                <SettingsIcon />
               </IconButton>
             </Tooltip>
           </ListItem>

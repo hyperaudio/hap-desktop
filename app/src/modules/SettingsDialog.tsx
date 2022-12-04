@@ -85,25 +85,20 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ onClose, ...prop
             <FormControl fullWidth>
               <FormControlLabel
                 control={
-                  <Stack direction="row">
-                    {colors.map((c: Color) => {
-                      return (
-                        <IconButton
-                          disabled={isEqual(c, color)}
-                          key={c[500]}
-                          onClick={() => onColorChange(c)}
-                          size="small"
+                  <Stack direction="row" spacing={0.5}>
+                    {colors.map((c: Color) => (
+                      <IconButton disabled={isEqual(c, color)} key={c[500]} onClick={() => onColorChange(c)}>
+                        <Avatar
+                          sx={theme => ({
+                            bgcolor: c[500],
+                            height: theme.spacing(2.22),
+                            width: theme.spacing(2.22),
+                          })}
                         >
-                          <Avatar
-                            sx={theme => ({
-                              bgcolor: c[500],
-                              height: theme.spacing(2.22),
-                              width: theme.spacing(2.22),
-                            })}
-                          />
-                        </IconButton>
-                      );
-                    })}
+                          {' '}
+                        </Avatar>
+                      </IconButton>
+                    ))}
                   </Stack>
                 }
                 label="Color"
