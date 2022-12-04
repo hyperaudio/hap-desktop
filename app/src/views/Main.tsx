@@ -2,7 +2,7 @@ import { Outlet } from 'react-router-dom';
 import { PropsWithChildren, useMemo } from 'react';
 import { useAtom } from 'jotai';
 
-import { AppBar, Box, CssBaseline, Color, Drawer, PaletteMode, Toolbar } from '@mui/material';
+import { AppBar, Box, CssBaseline, Color, Drawer, PaletteMode, Paper, Toolbar } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 
 import { StatusBar, ToolBar } from '@/modules';
@@ -23,7 +23,7 @@ export const MainView: React.FC<PropsWithChildren> = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ display: 'flex' }}>
+      <Paper sx={{ borderRadius: 0, height: '100vh' }}>
         <Drawer
           open
           sx={{
@@ -41,20 +41,21 @@ export const MainView: React.FC<PropsWithChildren> = () => {
         >
           <ToolBar />
         </Drawer>
-        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+        <Box component="main" sx={{ bottom: 0, left: SIDE_WIDTH, p: 3, position: 'fixed', right: 0, top: 0 }}>
           <Outlet />
           <Toolbar variant="dense" />
         </Box>
-      </Box>
+      </Paper>
       <AppBar
         component="footer"
         elevation={0}
         position="fixed"
         sx={theme => ({
-          bgcolor: 'background.paper',
-          borderTop: `1px solid ${theme.palette.divider}`,
+          // borderTop: `1px solid ${theme.palette.divider}`,
+          bgcolor: 'transparent',
           bottom: 0,
           left: SIDE_WIDTH,
+          pointerEvents: 'none',
           right: 0,
           top: 'auto',
           width: 'auto',

@@ -124,7 +124,7 @@ interface EditorProps {
   readOnly?: boolean;
 }
 
-const Editor = ({
+export const Editor = ({
   initialState = EditorState.createEmpty(),
   playheadDecorator = PlayheadDecorator,
   decorators = [],
@@ -423,7 +423,7 @@ const Editor = ({
               transform: 'translate(-12px, -4px) !important',
               width: SPEAKER_AREA_WIDTH,
             },
-            elevation: 6,
+            elevation: 2,
           }}
           // transition // TODO: @pio: make it follow new API
         >
@@ -438,7 +438,7 @@ const Editor = ({
               PaperComponent={props => (
                 <Paper
                   {...props}
-                  elevation={6}
+                  elevation={2}
                   sx={{ width: 'fit-content', transform: 'translateX(none) !important' }}
                 />
               )}
@@ -570,7 +570,7 @@ const Style = ({
   <style scoped>
     {`
       div[data-block='true'][data-offset-key="${blockKey}-0-0"] {
-        color: ${played ? theme.palette.text.disabled : theme.palette.common.black};
+        color: ${played ? theme.palette.text.disabled : theme.palette.text.primary};
         border-radius: 10px;
       }
       .Right div[data-block='true'][data-offset-key="${blockKey}-0-0"] {

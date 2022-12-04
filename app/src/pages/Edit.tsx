@@ -1,50 +1,50 @@
+import React, { useState, useMemo, useRef, useCallback, useEffect, useLayoutEffect } from 'react';
 import {
-  ipcRenderer,
+  FileFilter,
   IpcRendererEvent,
   OpenDialogOptions,
   OpenDialogReturnValue,
   SaveDialogOptions,
   SaveDialogReturnValue,
-  FileFilter,
+  ipcRenderer,
 } from 'electron';
 import { readFileSync, createWriteStream } from 'fs';
 import path from 'path';
 import { strict as assert } from 'node:assert';
 import JSZip from 'jszip';
-
-import React, { useState, useMemo, useRef, useCallback, useEffect, useLayoutEffect } from 'react';
-import { Container, unstable_composeClasses } from '@mui/material';
-import Box from '@mui/material/Box';
 import { EditorState, ContentState, RawDraftContentBlock, convertFromRaw } from 'draft-js';
 import { v4 as uuidv4 } from 'uuid';
-import { styled } from '@mui/material/styles';
 
-import { Editor, createEntityMap } from '../components/editor';
-import Player from '../components/player/Player';
-import { StatusBar } from '../modules';
-import { MainView } from '../views';
+import { Button, Box, Card, Container, Grid, GridProps, Typography, Stack } from '@mui/material';
+import { styled, useTheme } from '@mui/material/styles';
+import AddIcon from '@mui/icons-material/Add';
+import FileOpenIcon from '@mui/icons-material/FileOpen';
+import { Pinwheel } from '@uiball/loaders';
+
+import { Editor, createEntityMap } from '@/modules';
+import { Player } from '@/components';
 
 const PREFIX = 'EditorPage';
 const CONTROLS_HEIGHT = 60;
 
 const classes = {
+  root: `${PREFIX}-Root`,
   controls: `${PREFIX}-controls`,
   editor: `${PREFIX}-editor`,
   paneTitle: `${PREFIX}-paneTitle`,
   player: `${PREFIX}-player`,
-  root: `${PREFIX}-root`,
   stage: `${PREFIX}-stage`,
   theatre: `${PREFIX}-theatre`,
   toolbar: `${PREFIX}-toolbar`,
   transcript: `${PREFIX}-transcript`,
 };
 
-const Root = styled('div', {
+const Root = styled(Grid, {
   // shouldForwardProp: (prop: any) => prop !== 'isActive',
-})(({ theme }) => ({
+})<GridProps>(({ theme }) => ({
   bottom: 0,
   left: 0,
-  position: 'fixed',
+  position: 'absolute',
   right: 0,
   top: 0,
   [`& .${classes.editor}`]: {
@@ -80,12 +80,6 @@ const Root = styled('div', {
     [theme.breakpoints.up('sm')]: {
       border: `1px solid rgba(255,255,255,0.22)`,
     },
-  },
-  [`& .${classes.playerWrapper}`]: {
-    height: '100%',
-    paddingTop: '56.25%',
-    position: 'relative',
-    width: '100%',
   },
   [`& .${classes.player}`]: {
     borderRadius: theme.shape.borderRadius * 2,
@@ -132,6 +126,8 @@ const Root = styled('div', {
 }));
 
 export const EditPage: React.FC = () => {
+  const theme = useTheme();
+
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<Error>();
@@ -229,7 +225,6 @@ export const EditPage: React.FC = () => {
   );
 
   const handleOpen = useCallback(async () => {
-    setLoading(true);
     try {
       const {
         filePaths: [readFilePath],
@@ -243,6 +238,8 @@ export const EditPage: React.FC = () => {
       });
       console.log({ readFilePath });
       setFilePath(readFilePath);
+
+      if (readFilePath) setLoading(true);
 
       const zip = await JSZip.loadAsync(readFileSync(readFilePath));
       const media = await Promise.all(
@@ -308,62 +305,84 @@ export const EditPage: React.FC = () => {
   }, [div, pip]);
 
   return (
-    <Root className={classes.root}>
-      <Container maxWidth="md">
-        {/* <button onClick={handleOpen} disabled={loading}>
-          {loading ? 'Opening…' : 'Open'}
-        </button>
-        <button onClick={handleSave} disabled={saving}>
-          {saving ? 'Saving…' : 'Save'}
-        </button>
-        <hr /> */}
-        {url ? (
-          <Player
-            {...{
-              url,
-              playing,
-              play,
-              pause,
-              buffering,
-              setBuffering,
-              time,
-              setTime,
-              duration,
-              setDuration,
-              pip,
-              setPip,
-              hideVideo,
-              setHideVideo,
-              seekTime,
-              setSeekTime,
-            }}
-          />
-        ) : null}
-        {/* <hr /> */}
-        <Box
-          className={classes.transcript}
-          sx={{
-            overflow: 'auto',
-            py: 2,
-            display: 'block',
-          }}
-        >
-          <Container ref={div} maxWidth="sm">
-            {initialState ? (
-              <Editor
-                {...{ initialState, time, seekTo, speakers, setSpeakers, playing, play, pause }}
-                autoScroll
-                onChange={setDraft}
-                playheadDecorator={noKaraoke ? null : undefined}
-              />
-            ) : error ? (
-              <p>Error: {error?.message}</p>
+    <Root container className={classes.root} alignItems="stretch" alignContent="stretch">
+      {!initialState ? (
+        <Grid item xs sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
+          <Box textAlign="center">
+            {loading ? (
+              <Pinwheel size={36} lineWeight={2.5} speed={1.5} color={theme.palette.primary.main} />
             ) : (
-              <p>{loading ? 'opening file / skeleton' : 'no file, please open one'}</p>
+              <Stack direction="column" spacing={2}>
+                <Typography gutterBottom variant="h6">
+                  No file to show
+                </Typography>
+                <Button
+                  startIcon={<FileOpenIcon fontSize="small" sx={{ color: 'text.secondary' }} />}
+                  color="primary"
+                  disabled={loading}
+                  size="small"
+                  onClick={handleOpen}
+                >
+                  Open existing
+                </Button>
+                <Typography variant="body2" color="text.secondary">
+                  or
+                </Typography>
+                <Button startIcon={<AddIcon fontSize="small" sx={{ color: 'text.secondary' }} />} disabled={loading}>
+                  Create new
+                </Button>
+              </Stack>
             )}
-          </Container>
-        </Box>
-      </Container>
+          </Box>
+        </Grid>
+      ) : (
+        <Grid item container>
+          <Grid item xs={12} md={4} order={{ xs: 1, md: 2 }}>
+            {url ? (
+              <Player
+                {...{
+                  url,
+                  playing,
+                  play,
+                  pause,
+                  buffering,
+                  setBuffering,
+                  time,
+                  setTime,
+                  duration,
+                  setDuration,
+                  pip,
+                  setPip,
+                  hideVideo,
+                  setHideVideo,
+                  seekTime,
+                  setSeekTime,
+                }}
+              />
+            ) : null}
+          </Grid>
+          <Grid item xs={12} md={8} order={{ xs: 2, md: 1 }}>
+            <Container maxWidth="lg">
+              <Box className={classes.transcript} sx={{ overflow: 'auto', display: 'block' }}>
+                <Container ref={div} fixed maxWidth="sm">
+                  {initialState ? (
+                    <Editor
+                      {...{ initialState, time, seekTo, speakers, setSpeakers, playing, play, pause }}
+                      autoScroll
+                      onChange={setDraft}
+                      playheadDecorator={noKaraoke ? null : undefined}
+                    />
+                  ) : error ? (
+                    <p>Error: {error?.message}</p>
+                  ) : (
+                    <p></p>
+                  )}
+                </Container>
+              </Box>
+            </Container>
+          </Grid>
+        </Grid>
+      )}
     </Root>
   );
 };
