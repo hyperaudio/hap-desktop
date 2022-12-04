@@ -11,8 +11,8 @@ import { readFileSync, createWriteStream } from 'fs';
 import path from 'path';
 import JSZip from 'jszip';
 
-import React, { useState, useMemo, useRef, useCallback } from 'react';
-import { Container } from '@mui/material';
+import React, { useState, useMemo, useRef, useCallback, useEffect, EffectCallback } from 'react';
+import { Container, unstable_composeClasses } from '@mui/material';
 import { EditorState, ContentState, RawDraftContentBlock, convertFromRaw } from 'draft-js';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -20,7 +20,6 @@ import { Editor, createEntityMap } from '../components/editor';
 import Player from '../components/player/Player';
 import { StatusBar } from '../modules';
 import { MainView } from '../views';
-// import sampleTranscript from './data/sampleTranscript.json';
 
 export const EditPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -29,10 +28,10 @@ export const EditPage: React.FC = () => {
 
   const [metadata, setMetadata] = useState<Record<string, any>>({ id: uuidv4() });
   const [media, setMedia] = useState<Record<string, any>>({});
-  const [url, setUrl] = useState<string | undefined>(); // 'https://stream.hyper.audio/q3xsh/input/YCCJ4HtHr4jy2Dxxr5wf2U/video.mp4'
+  const [url, setUrl] = useState<string | undefined>();
   const [data, setData] = useState<{ speakers: { [key: string]: any } | null; blocks: RawDraftContentBlock[] | null }>({
-    speakers: null, // sampleTranscript.speakers,
-    blocks: null, // sampleTranscript.blocks.map(block => ({ ...block, type: 'paragraph', depth: 0 })),
+    speakers: null,
+    blocks: null,
   });
 
   const [speakers, setSpeakers] = useState({});
@@ -60,6 +59,8 @@ export const EditPage: React.FC = () => {
   const pause = useCallback(() => setPlaying(false), []);
 
   const handleSave = useCallback(async () => {
+    // if (!blocks || blocks.length === 0) return;
+
     setSaving(true);
     try {
       const defaultPath = path.join(await homeDirectory(), 'Untitled.hyperaudio');
@@ -141,6 +142,22 @@ export const EditPage: React.FC = () => {
       setError(error as Error);
     }
     setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    ipcRenderer.on('menu-action', (_, action) => {
+      console.log('menu-action', action);
+      switch (action) {
+        case 'save-as':
+          handleSave();
+          break;
+        case 'open':
+          handleOpen();
+          break;
+      }
+    });
+
+    return (() => ipcRenderer.removeAllListeners('menu-action')) as unknown as void; // FIXME
   }, []);
 
   return (

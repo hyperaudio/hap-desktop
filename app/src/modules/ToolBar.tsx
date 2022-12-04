@@ -1,3 +1,6 @@
+import { ipcRenderer } from 'electron';
+import React, { useCallback } from 'react';
+
 import { IconButton, List, ListItem, Tooltip } from '@mui/material';
 import FileOpenIcon from '@mui/icons-material/FileOpen';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -11,13 +14,15 @@ interface ToolBarProps {}
 export const ToolBar: React.FC<ToolBarProps> = ({ ...props }) => {
   const [showSettings, settingsDialog] = useSettingsDialog();
 
+  const openFile = useCallback(() => ipcRenderer.invoke('relay-menu-action', 'open'), []);
+
   return (
     <>
       <Stack direction="column" justifyContent="space-between" spacing={1} sx={{ height: '100%' }}>
         <List component={Stack} spacing={1}>
           <ListItem disablePadding sx={{ display: 'block', textAlign: 'center' }}>
             <Tooltip arrow title="Open file…" placement="right">
-              <IconButton onClick={() => alert('Lemme open a file from here!')}>
+              <IconButton onClick={openFile}>
                 <FileOpenIcon />
               </IconButton>
             </Tooltip>

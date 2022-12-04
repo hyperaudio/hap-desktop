@@ -1,14 +1,3 @@
-// The built directory structure
-//
-// ├─┬ dist
-// │ ├─┬ electron
-// │ │ ├─┬ main
-// │ │ │ └── index.js
-// │ │ └─┬ preload
-// │ │   └── index.js
-// │ ├── index.html
-// │ ├── ...other-static-files-from-public
-// │
 process.env.DIST = join(__dirname, '../..')
 process.env.PUBLIC = app.isPackaged ? process.env.DIST : join(process.env.DIST, '../public')
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true'
@@ -84,10 +73,28 @@ async function createWindow() {
       submenu: [
         { label: 'New transcript', enabled: false },
         { type: 'separator' },
-        { label: 'Open transcript', enabled: false },
+        {
+          label: 'Open transcript',
+          enabled: true,
+          click () {
+            win.webContents.send('menu-action', 'open')
+          }
+        },
         { type: 'separator' },
-        { label: 'Save transcript', enabled: false },
-        { label: 'Save transcript as', enabled: false },
+        {
+          label: 'Save transcript',
+          enabled: true,
+          click () {
+            win.webContents.send('menu-action', 'save-as') // TODO save without prompt
+          }
+        },
+        {
+          label: 'Save transcript as',
+          enabled: true,
+          click () {
+            win.webContents.send('menu-action', 'save-as')
+          }
+        },
       ],
     },
     {
@@ -198,6 +205,7 @@ app.on('activate', () => {
 ipcMain.handle('home-directory', () => app.getPath('home'));
 ipcMain.handle('write-file', (event, options) => dialog.showSaveDialog(BrowserWindow.fromWebContents(event.sender), options));
 ipcMain.handle('open-file', (event, options) => dialog.showOpenDialog(BrowserWindow.fromWebContents(event.sender), options));
+ipcMain.handle('relay-menu-action', (event, action) => win?.webContents.send('menu-action', action));
 
 // new window example arg: new windows url
 ipcMain.handle('open-win', (event, arg) => {
@@ -214,3 +222,5 @@ ipcMain.handle('open-win', (event, arg) => {
     // childWindow.webContents.openDevTools({ mode: "undocked", activate: true })
   }
 })
+
+ipcMain.handle('ipc-test', (event, options) => console.log('ipc-test', event, options));
