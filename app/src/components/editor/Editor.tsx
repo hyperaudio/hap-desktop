@@ -423,7 +423,7 @@ const Editor = ({
               transform: 'translate(-12px, -4px) !important',
               width: SPEAKER_AREA_WIDTH,
             },
-            elevation: 6,
+            elevation: 2,
           }}
           // transition // TODO: @pio: make it follow new API
         >
@@ -438,7 +438,7 @@ const Editor = ({
               PaperComponent={props => (
                 <Paper
                   {...props}
-                  elevation={6}
+                  elevation={2}
                   sx={{ width: 'fit-content', transform: 'translateX(none) !important' }}
                 />
               )}
