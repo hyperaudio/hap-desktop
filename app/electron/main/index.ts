@@ -85,7 +85,7 @@ async function createWindow() {
           label: 'Save transcript',
           enabled: true,
           click () {
-            win.webContents.send('menu-action', 'save-as') // TODO save without prompt
+            win.webContents.send('menu-action', 'save') // TODO save without prompt
           }
         },
         {

@@ -9,6 +9,7 @@ import {
 } from 'electron';
 import { readFileSync, createWriteStream } from 'fs';
 import path from 'path';
+import { strict as assert } from 'node:assert';
 import JSZip from 'jszip';
 
 import React, { useState, useMemo, useRef, useCallback, useEffect, useLayoutEffect } from 'react';
@@ -173,51 +174,65 @@ export const EditPage: React.FC = () => {
     console.log('TODO seekTo', time);
   };
 
-  const handleSave = useCallback(async () => {
-    // if (!blocks || blocks.length === 0) return;
+  const [filePath, setFilePath] = useState<string | undefined>();
+  console.log({ filePath });
 
-    setSaving(true);
-    try {
-      const defaultPath = path.join(await homeDirectory(), 'Untitled.hyperaudio');
+  const handleSave = useCallback(
+    async (saveAs: boolean = false) => {
+      // if (!blocks || blocks.length === 0) return;
 
-      const filePath =
-        (await (
-          await writeFile({
-            title: 'Save Hyperaudio file as…',
-            defaultPath,
-            properties: ['createDirectory', 'showOverwriteConfirmation'],
-            filters: [
-              { name: 'Hyperaudio Files', extensions: ['hyperaudio'] },
-              { name: 'All Files', extensions: ['*'] },
-            ],
+      setSaving(true);
+
+      try {
+        const defaultPath = path.join(await homeDirectory(), 'Untitled.hyperaudio');
+        console.log({ filePath, saveAs, 'saveAs || !filePath': saveAs || !filePath, defaultPath });
+
+        const writeFilePath =
+          saveAs || !filePath
+            ? (await (
+                await writeFile({
+                  title: 'Save Hyperaudio file as…',
+                  defaultPath,
+                  properties: ['createDirectory', 'showOverwriteConfirmation'],
+                  filters: [
+                    { name: 'Hyperaudio Files', extensions: ['hyperaudio'] },
+                    { name: 'All Files', extensions: ['*'] },
+                  ],
+                })
+              ).filePath) ?? defaultPath
+            : filePath ?? defaultPath;
+
+        assert.notEqual(writeFilePath, '');
+        setFilePath(writeFilePath);
+
+        const zip = JSZip();
+        zip.file('metadata.json', JSON.stringify(metadata));
+        zip.file(`transcript/${metadata.id}.json`, JSON.stringify({ speakers, blocks: draft?.blocks ?? [] }));
+        Object.keys(media).forEach(id => zip.file(`media/${id}`, media[id].buffer));
+
+        let timeout = setTimeout(() => setSaving(false), 5000);
+        await zip
+          .generateNodeStream({ type: 'nodebuffer', streamFiles: true }, metadata => {
+            console.log('TODO progress', metadata);
+            clearTimeout(timeout);
+            timeout = setTimeout(() => setSaving(false), 5000);
           })
-        ).filePath) ?? defaultPath;
-
-      const zip = JSZip();
-      zip.file('metadata.json', JSON.stringify(metadata));
-      zip.file(`transcript/${metadata.id}.json`, JSON.stringify({ speakers, blocks: draft?.blocks ?? [] }));
-      Object.keys(media).forEach(id => zip.file(`media/${id}`, media[id].buffer));
-
-      let timeout = setTimeout(() => setSaving(false), 5000);
-      await zip
-        .generateNodeStream({ type: 'nodebuffer', streamFiles: true }, metadata => {
-          console.log('TODO progress', metadata);
-          clearTimeout(timeout);
-          timeout = setTimeout(() => setSaving(false), 5000);
-        })
-        .pipe(createWriteStream(filePath));
-    } catch (error) {
-      setError(error as Error);
-      setSaving(false);
-    }
-    // setSaving(false);
-  }, [metadata, media, speakers, draft]);
+          .pipe(createWriteStream(writeFilePath));
+      } catch (error) {
+        console.error(error);
+        setError(error as Error);
+        setSaving(false);
+      }
+      // setSaving(false);
+    },
+    [metadata, media, speakers, draft, filePath],
+  );
 
   const handleOpen = useCallback(async () => {
     setLoading(true);
     try {
       const {
-        filePaths: [filePath],
+        filePaths: [readFilePath],
       } = await openFile({
         title: 'Open Hyperaudio file…',
         properties: ['openFile', 'promptToCreate', 'createDirectory'],
@@ -226,8 +241,10 @@ export const EditPage: React.FC = () => {
           { name: 'All Files', extensions: ['*'] },
         ],
       });
+      console.log({ readFilePath });
+      setFilePath(readFilePath);
 
-      const zip = await JSZip.loadAsync(readFileSync(filePath));
+      const zip = await JSZip.loadAsync(readFileSync(readFilePath));
       const media = await Promise.all(
         zip.file(/^media\//).map(async file => ({
           id: file.name.split('/').pop()?.split('.').reverse().pop(),
@@ -263,8 +280,11 @@ export const EditPage: React.FC = () => {
     ipcRenderer.on('menu-action', (_, action) => {
       console.log('menu-action', action);
       switch (action) {
+        case 'save':
+          handleSave(false);
+          break;
         case 'save-as':
-          handleSave();
+          handleSave(true);
           break;
         case 'open':
           handleOpen();
