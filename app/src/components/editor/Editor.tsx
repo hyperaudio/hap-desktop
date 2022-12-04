@@ -11,7 +11,7 @@ import {
   RawDraftContentBlock,
 } from 'draft-js';
 import TC, { FRAMERATE } from 'smpte-timecode';
-import { alignSTT, alignSTTwithPadding } from '@bbc/stt-align-node';
+// import { alignSTTwithPadding } from '@bbc/stt-align-node';
 import bs58 from 'bs58';
 import { useDebounce } from 'use-debounce';
 import { intersection, arrayIntersection } from 'interval-operations';
@@ -104,8 +104,8 @@ interface EditorProps {
     text: string,
     start: number,
     end: number,
-    callback?: (items: { [key: string]: any }[]) => void,
-  ) => { [key: string]: any }[];
+    callback?: (items: { start: number; end: number; text: string }[]) => void,
+  ) => { start: number; end: number; text: string }[];
   speakers: { [key: string]: any };
   setSpeakers: (speakers: { [key: string]: any }) => void;
   onChange: ({
@@ -131,7 +131,7 @@ const Editor = ({
   time = 0,
   seekTo,
   showDialog,
-  aligner, // = wordAligner,
+  aligner = wordAligner,
   speakers,
   setSpeakers,
   onChange: onChangeProp,
@@ -596,29 +596,37 @@ const timecode = (seconds = 0, frameRate = 25, dropFrame = false): string =>
     .slice(0, 3)
     .join(':');
 
-// const wordAligner = (
-//   words: { [key: string]: any }[],
-//   text: string,
-//   start: number,
-//   end: number,
-//   callback?: (items: { start: number; end: number; text: string; length: number; offset: number }[]) => void,
-// ): { start: number; end: number; text: string; length: number; offset: number }[] => {
-//   const aligned = alignSTTwithPadding({ words }, text, start, end);
+const wordAligner = (
+  words: { [key: string]: any }[],
+  text: string,
+  start: number,
+  end: number,
+  callback?: (items: { start: number; end: number; text: string }[]) => void,
+): { start: number; end: number; text: string }[] => {
+  const aligned = window.STTdiff ? window.STTdiff.alignSTTwithPadding({ words }, text, start, end) : words;
 
-//   const items = aligned.map(({ start, end, text }, i: number, arr: any[]) => ({
-//     start,
-//     end,
-//     text,
-//     length: text.length,
-//     offset:
-//       arr
-//         .slice(0, i)
-//         .map(({ text }: { text: string }) => text)
-//         .join(' ').length + (i === 0 ? 0 : 1),
-//   }));
+  const items = aligned.map(
+    ({ start, end, text }: { start: number; end: number; text: string }, i: number, arr: any[]) => ({
+      start,
+      end,
+      text,
+      length: text.length,
+      offset:
+        arr
+          .slice(0, i)
+          .map(({ text }: { text: string }) => text)
+          .join(' ').length + (i === 0 ? 0 : 1),
+    }),
+  );
 
-//   callback && callback(items);
-//   return items;
-// };
+  callback && callback(items);
+  return items;
+};
 
 export default Editor;
+
+declare global {
+  interface Window {
+    STTdiff: any;
+  }
+}
