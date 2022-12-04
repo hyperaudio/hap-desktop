@@ -12,6 +12,7 @@ import path from 'path';
 import JSZip from 'jszip';
 
 import React, { useState, useMemo, useRef, useCallback } from 'react';
+import { Container } from '@mui/material';
 import { EditorState, ContentState, RawDraftContentBlock, convertFromRaw } from 'draft-js';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -143,7 +144,7 @@ export const EditPage: React.FC = () => {
   }, []);
 
   return (
-    <div>
+    <Container maxWidth="md">
       <button onClick={handleOpen} disabled={loading}>
         {loading ? 'Opening…' : 'Open'}
       </button>
@@ -163,7 +164,7 @@ export const EditPage: React.FC = () => {
       ) : (
         <p>{loading ? 'opening file / skeleton' : 'no file, please open one'}</p>
       )}
-    </div>
+    </Container>
   );
 };
 
