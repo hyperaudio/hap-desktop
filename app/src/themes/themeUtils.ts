@@ -26,8 +26,8 @@ export const createMuiTheme = (payload: createMuiThemeProps) => {
   const palette: Palette = {
     ...p,
     background: {
-      paper: isDark ? darken(0.033, grey[900]) : 'white',
-      default: isDark ? darken(0.066, grey[800]) : 'white',
+      paper: isDark ? darken(0.025, grey[900]) : 'white',
+      default: isDark ? darken(0.025, grey[800]) : 'white',
     },
     primary: {
       ...p.primary,
@@ -142,7 +142,7 @@ export const createMuiTheme = (payload: createMuiThemeProps) => {
         styleOverrides: {
           root: {
             backdropFilter: 'blur(3px)',
-            backgroundColor: 'rgba(0,0,0,0.4)',
+            backgroundColor: 'rgba(0,0,0,0.5)',
           },
         },
       },

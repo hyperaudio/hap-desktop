@@ -18,8 +18,8 @@ import { EditorState, ContentState, RawDraftContentBlock, convertFromRaw } from 
 import { v4 as uuidv4 } from 'uuid';
 import { styled } from '@mui/material/styles';
 
-import { Editor, createEntityMap } from '../components/editor';
-import Player from '../components/player/Player';
+import { Editor, createEntityMap } from '@/modules';
+import { Player } from '@/components';
 import { StatusBar } from '../modules';
 import { MainView } from '../views';
 

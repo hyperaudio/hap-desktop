@@ -31,7 +31,7 @@ const classes = {
   transcript: `${PREFIX}-transcript`,
 };
 
-const Player = ({
+export const Player = ({
   url,
   playing,
   play,

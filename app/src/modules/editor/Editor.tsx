@@ -124,7 +124,7 @@ interface EditorProps {
   readOnly?: boolean;
 }
 
-const Editor = ({
+export const Editor = ({
   initialState = EditorState.createEmpty(),
   playheadDecorator = PlayheadDecorator,
   decorators = [],
