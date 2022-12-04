@@ -27,7 +27,7 @@ export const createMuiTheme = (payload: createMuiThemeProps) => {
     ...p,
     background: {
       paper: isDark ? darken(0.025, grey[900]) : 'white',
-      default: isDark ? darken(0.025, grey[800]) : 'white',
+      default: isDark ? lighten(0.025, grey[900]) : 'white',
     },
     primary: {
       ...p.primary,
@@ -102,6 +102,43 @@ export const createMuiTheme = (payload: createMuiThemeProps) => {
           },
         },
       },
+      MuiBackdrop: {
+        styleOverrides: {
+          root: {
+            backdropFilter: 'blur(3px)',
+            backgroundColor: 'rgba(0,0,0,0.5)',
+          },
+        },
+      },
+      MuiButton: {
+        defaultProps: {
+          variant: 'contained',
+        },
+        styleOverrides: {
+          root: {
+            padding: t.spacing(0.8, 1.5),
+            boxShadow: shadows[isDark ? 1 : 1],
+            color: palette.text.primary,
+            background: isDark ? `rgba(255,255,255,${palette.action.activatedOpacity})` : darken(0.011, '#fff'),
+            '&:hover': {
+              boxShadow: shadows[isDark ? 1 : 1],
+              color: palette.text.primary,
+              background: isDark ? `rgba(255,255,255, ${palette.action.hoverOpacity})` : 'white',
+            },
+          },
+          contained: {
+            minWidth: '0',
+          },
+        },
+      },
+      MuiCard: {
+        styleOverrides: {
+          root: {
+            padding: t.spacing(2),
+            background: palette.background.default,
+          },
+        },
+      },
       MuiCssBaseline: {
         styleOverrides: `
           @font-face {
@@ -134,38 +171,9 @@ export const createMuiTheme = (payload: createMuiThemeProps) => {
           }
           body: {
             color: ${palette.text.primary};
-            background-color: ${palette.background.default};
+            background-color: ${palette.background.paper};
           }
       `,
-      },
-      MuiBackdrop: {
-        styleOverrides: {
-          root: {
-            backdropFilter: 'blur(3px)',
-            backgroundColor: 'rgba(0,0,0,0.5)',
-          },
-        },
-      },
-      MuiButton: {
-        defaultProps: {
-          variant: 'contained',
-        },
-        styleOverrides: {
-          root: {
-            padding: t.spacing(0.8, 1.5),
-            boxShadow: shadows[isDark ? 1 : 1],
-            color: palette.text.primary,
-            background: isDark ? `rgba(255,255,255,${palette.action.activatedOpacity})` : darken(0.011, '#fff'),
-            '&:hover': {
-              boxShadow: shadows[isDark ? 1 : 1],
-              color: palette.text.primary,
-              background: isDark ? `rgba(255,255,255, ${palette.action.hoverOpacity})` : 'white',
-            },
-          },
-          contained: {
-            minWidth: '0',
-          },
-        },
       },
       MuiDialog: {
         defaultProps: {
