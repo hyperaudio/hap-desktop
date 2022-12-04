@@ -69,6 +69,13 @@ export const createMuiTheme = (payload: createMuiThemeProps) => {
           size: 'small',
         },
       },
+      MuiPaper: {
+        styleOverrides: {
+          rounded: {
+            borderRadius: rootTheme.shape.borderRadius * 2,
+          },
+        },
+      },
       MuiSvgIcon: {
         defaultProps: {
           fontSize: 'small',
