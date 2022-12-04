@@ -11,8 +11,9 @@ import { readFileSync, createWriteStream } from 'fs';
 import path from 'path';
 import JSZip from 'jszip';
 
-import React, { useState, useMemo, useRef, useCallback, useEffect, EffectCallback } from 'react';
+import React, { useState, useMemo, useRef, useCallback, useEffect, useLayoutEffect } from 'react';
 import { Container, unstable_composeClasses } from '@mui/material';
+import Box from '@mui/material/Box';
 import { EditorState, ContentState, RawDraftContentBlock, convertFromRaw } from 'draft-js';
 import { v4 as uuidv4 } from 'uuid';
 import { styled } from '@mui/material/styles';
@@ -276,16 +277,26 @@ export const EditPage: React.FC = () => {
 
   const noKaraoke = false;
 
+  const div = useRef<HTMLDivElement>();
+  const [top, setTop] = useState(500);
+
+  useLayoutEffect(() => {
+    // console.log('useLayoutEffect');
+    const value = div.current?.getBoundingClientRect().top ?? 500;
+    console.log(div.current?.getBoundingClientRect(), value, pip);
+    setTop(value);
+  }, [div, pip]);
+
   return (
     <Root className={classes.root}>
       <Container maxWidth="md">
-        <button onClick={handleOpen} disabled={loading}>
+        {/* <button onClick={handleOpen} disabled={loading}>
           {loading ? 'Opening…' : 'Open'}
         </button>
         <button onClick={handleSave} disabled={saving}>
           {saving ? 'Saving…' : 'Save'}
         </button>
-        <hr />
+        <hr /> */}
         {url ? (
           <Player
             {...{
@@ -308,19 +319,30 @@ export const EditPage: React.FC = () => {
             }}
           />
         ) : null}
-        <hr />
-        {initialState ? (
-          <Editor
-            {...{ initialState, time, seekTo, speakers, setSpeakers, playing, play, pause }}
-            autoScroll
-            onChange={setDraft}
-            playheadDecorator={noKaraoke ? null : undefined}
-          />
-        ) : error ? (
-          <p>Error: {error?.message}</p>
-        ) : (
-          <p>{loading ? 'opening file / skeleton' : 'no file, please open one'}</p>
-        )}
+        {/* <hr /> */}
+        <Box
+          className={classes.transcript}
+          sx={{
+            overflow: 'auto',
+            py: 2,
+            display: 'block',
+          }}
+        >
+          <Container ref={div} maxWidth="sm">
+            {initialState ? (
+              <Editor
+                {...{ initialState, time, seekTo, speakers, setSpeakers, playing, play, pause }}
+                autoScroll
+                onChange={setDraft}
+                playheadDecorator={noKaraoke ? null : undefined}
+              />
+            ) : error ? (
+              <p>Error: {error?.message}</p>
+            ) : (
+              <p>{loading ? 'opening file / skeleton' : 'no file, please open one'}</p>
+            )}
+          </Container>
+        </Box>
       </Container>
     </Root>
   );
