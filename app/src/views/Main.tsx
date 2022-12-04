@@ -2,7 +2,7 @@ import { Outlet } from 'react-router-dom';
 import { PropsWithChildren, useMemo } from 'react';
 import { useAtom } from 'jotai';
 
-import { AppBar, Box, CssBaseline, Color, Drawer, PaletteMode, Toolbar } from '@mui/material';
+import { AppBar, Box, CssBaseline, Color, Drawer, PaletteMode, Paper, Toolbar } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 
 import { StatusBar, ToolBar } from '@/modules';
@@ -23,7 +23,7 @@ export const MainView: React.FC<PropsWithChildren> = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ display: 'flex' }}>
+      <Paper sx={{ display: 'flex', minHeight: '100vh' }}>
         <Drawer
           open
           sx={{
@@ -45,7 +45,7 @@ export const MainView: React.FC<PropsWithChildren> = () => {
           <Outlet />
           <Toolbar variant="dense" />
         </Box>
-      </Box>
+      </Paper>
       <AppBar
         component="footer"
         elevation={0}
