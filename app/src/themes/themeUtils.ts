@@ -242,14 +242,6 @@ export const createMuiTheme = (payload: createMuiThemeProps) => {
         defaultProps: {
           fontSize: 'small',
         },
-        styleOverrides: {
-          fontSizeSmall: {
-            fontSize: '1rem',
-          },
-          fontSizeLarge: {
-            fontSize: '2rem',
-          },
-        },
       },
       MuiTooltip: {
         defaultProps: {
