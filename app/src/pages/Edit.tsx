@@ -12,6 +12,7 @@ import { readFileSync, createWriteStream } from 'fs';
 import path from 'path';
 import { strict as assert } from 'node:assert';
 import JSZip from 'jszip';
+import ReactPlayer from 'react-player';
 import { EditorState, ContentState, RawDraftContentBlock, convertFromRaw } from 'draft-js';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -166,12 +167,17 @@ export const EditPage: React.FC = () => {
   const play = useCallback(() => setPlaying(true), []);
   const pause = useCallback(() => setPlaying(false), []);
 
-  const seekTo = (time: number): void => {
-    console.log('TODO seekTo', time);
-  };
+  const player = useRef<ReactPlayer>() as MutableRefObject<ReactPlayer>;
+  const seekTo = useCallback(
+    (time: number): void => {
+      setSeekTime(time);
+      if (player.current) player.current.seekTo(time, 'seconds');
+    },
+    [player],
+  );
 
   const [filePath, setFilePath] = useState<string | undefined>();
-  console.log({ filePath });
+  // console.log({ filePath });
 
   const handleSave = useCallback(
     async (saveAs: boolean = false) => {
@@ -340,6 +346,7 @@ export const EditPage: React.FC = () => {
           <Grid item xs={12} md={4} order={{ xs: 1, md: 2 }}>
             {url ? (
               <Player
+                ref={player}
                 {...{
                   url,
                   playing,
