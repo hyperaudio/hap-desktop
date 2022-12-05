@@ -1,11 +1,12 @@
 /**
+ * @type {import('electron-builder').Configuration}
  * @see https://www.electron.build/configuration/configuration
  */
 {
-  appId: 'YourAppID',
+  appId: 'audio.hyper.app',
   productName: 'Hyperaudio-Desktop',
   copyright: 'Copyright © 2022 Hyperaudio',
-  asar: true,
+  asar: false,
   directories: {
     output: 'release/${version}',
     buildResources: 'electron/resources',
@@ -18,7 +19,7 @@
         arch: ['x64'],
       },
     ],
-    artifactName: '${productName}-Windows-${version}-Setup.${ext}',
+    artifactName: '${productName}-Windows-${arch}-${version}-Setup.${ext}',
   },
   nsis: {
     oneClick: false,
@@ -27,13 +28,28 @@
     deleteAppDataOnUninstall: false,
   },
   mac: {
-    target: ['dmg'],
-    artifactName: '${productName}-Mac-${version}-Installer.${ext}',
+    target: [
+      {
+        target: 'dmg',
+        arch: ['x64', 'arm64'],
+      },
+      {
+        target: 'zip',
+        arch: ['x64', 'arm64'],
+      },
+    ],
+    artifactName: '${productName}-Mac-${arch}-${version}-Installer.${ext}',
+    category: 'public.app-category.productivity',
+    darkModeSupport: true,
+    hardenedRuntime: true,
+    gatekeeperAssess: true,
   },
   linux: {
     icon: 'electron/resources/iconset',
     target: ['AppImage', 'deb'],
-    artifactName: '${productName}-Linux-${version}.${ext}',
+    artifactName: '${productName}-Linux-${arch}-${version}.${ext}',
+    category: 'Audio',
   },
   electronVersion: '20.2.0',
+  // afterSign: './afterSignHook.js',
 }
