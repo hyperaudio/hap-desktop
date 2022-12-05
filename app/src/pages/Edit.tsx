@@ -47,6 +47,7 @@ const Root = styled(Grid, {
   left: 0,
   position: 'absolute',
   right: 0,
+  overflow: 'auto',
   top: 0,
   [`& .${classes.editor}`]: {
     alignItems: 'center',
@@ -345,48 +346,50 @@ export const EditPage: React.FC = () => {
         <Grid item container>
           <Grid item xs={12} md={4} order={{ xs: 1, md: 2 }}>
             {url ? (
-              <Player
-                ref={player}
-                {...{
-                  url,
-                  playing,
-                  play,
-                  pause,
-                  buffering,
-                  setBuffering,
-                  time,
-                  setTime,
-                  duration,
-                  setDuration,
-                  pip,
-                  setPip,
-                  hideVideo,
-                  setHideVideo,
-                  seekTime,
-                  setSeekTime,
-                }}
-              />
+              <Box sx={{ position: 'fixed', top: 0, right: 0, width: '33%' }}>
+                <Player
+                  ref={player}
+                  {...{
+                    url,
+                    playing,
+                    play,
+                    pause,
+                    buffering,
+                    setBuffering,
+                    time,
+                    setTime,
+                    duration,
+                    setDuration,
+                    pip,
+                    setPip,
+                    hideVideo,
+                    setHideVideo,
+                    seekTime,
+                    setSeekTime,
+                  }}
+                />
+              </Box>
             ) : null}
           </Grid>
           <Grid item xs={12} md={8} order={{ xs: 2, md: 1 }}>
-            <Container maxWidth="lg">
-              <Box className={classes.transcript} sx={{ overflow: 'auto', display: 'block' }}>
-                <Container ref={div} fixed maxWidth="sm">
-                  {initialState ? (
-                    <Editor
-                      {...{ initialState, time, seekTo, speakers, setSpeakers, playing, play, pause }}
-                      autoScroll
-                      onChange={setDraft}
-                      playheadDecorator={noKaraoke ? null : undefined}
-                    />
-                  ) : error ? (
-                    <p>Error: {error?.message}</p>
-                  ) : (
-                    <p></p>
-                  )}
-                </Container>
-              </Box>
+            {/* <Container maxWidth="lg"> */}
+            {/* <Box className={classes.transcript} sx={{ overflow: 'auto', display: 'block' }}> */}
+            <Container ref={div} fixed maxWidth="sm">
+              {initialState ? (
+                <Editor
+                  {...{ initialState, time, seekTo, speakers, setSpeakers, playing, play, pause }}
+                  autoScroll
+                  onChange={setDraft}
+                  playheadDecorator={noKaraoke ? null : undefined}
+                />
+              ) : error ? (
+                <p>Error: {error?.message}</p>
+              ) : (
+                <p></p>
+              )}
             </Container>
+            {/* </Box> */}
+            {/* </Container> */}
           </Grid>
         </Grid>
       )}
