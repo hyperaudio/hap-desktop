@@ -1,7 +1,7 @@
 import { darken, lighten } from 'polished';
 
 import MuiShadows from '@mui/material/styles/shadows';
-import { Color, Palette, PaletteMode, Theme, Shadows } from '@mui/material';
+import { Color, Palette, PaletteMode, Shadows, Theme } from '@mui/material';
 import { createTheme } from '@mui/material/styles';
 import { deepPurple, grey } from '@mui/material/colors';
 

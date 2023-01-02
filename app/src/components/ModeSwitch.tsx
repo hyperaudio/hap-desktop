@@ -2,8 +2,11 @@ import { useState } from 'react';
 import { find, isEqual } from 'lodash';
 import { useAtom } from 'jotai';
 
-import { Button, ButtonProps, PaletteMode, Menu, MenuItem } from '@mui/material';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import Button from '@mui/material/Button';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import { ButtonProps, PaletteMode } from '@mui/material';
 
 import { modes } from '@/config';
 import { settingsModeAtom } from '@/state';

@@ -4,8 +4,11 @@ import React, { useCallback } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import FileOpenIcon from '@mui/icons-material/FileOpen';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import IconButton from '@mui/material/IconButton';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
 import SettingsIcon from '@mui/icons-material/Settings';
-import { IconButton, List, ListItem, Tooltip } from '@mui/material';
+import Tooltip from '@mui/material/Tooltip';
 
 import { useSettingsDialog } from '@/modules';
 import { Stack } from '@mui/system';

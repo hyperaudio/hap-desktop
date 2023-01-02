@@ -2,8 +2,11 @@ import { useState } from 'react';
 import { isEqual } from 'lodash';
 import { useAtom } from 'jotai';
 
-import { Color, Menu, IconButton, IconButtonProps, ListItem } from '@mui/material';
 import CircleIcon from '@mui/icons-material/Circle';
+import IconButton from '@mui/material/IconButton';
+import ListItem from '@mui/material/ListItem';
+import Menu from '@mui/material/Menu';
+import { Color, IconButtonProps } from '@mui/material';
 
 import { colors } from '@/config';
 import { settingsColorAtom } from '@/state';

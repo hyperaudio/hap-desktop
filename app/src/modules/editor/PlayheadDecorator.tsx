@@ -1,7 +1,7 @@
 import React from 'react';
+import { ContentBlock, ContentState, EditorState } from 'draft-js';
 
 import { styled } from '@mui/material/styles';
-import { ContentBlock, ContentState, EditorState } from 'draft-js';
 
 const PREFIX = 'Playhead';
 const classes = {

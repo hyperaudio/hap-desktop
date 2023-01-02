@@ -1,6 +1,7 @@
 import React, { useMemo, useCallback, useRef, MutableRefObject, useState, forwardRef, ForwardedRef } from 'react';
 import ReactPlayer from 'react-player';
 import TC from 'smpte-timecode';
+import { isArray } from 'lodash';
 
 import Box from '@mui/material/Box';
 import FastForwardIcon from '@mui/icons-material/FastForward';
@@ -14,8 +15,6 @@ import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
-import { styled } from '@mui/material/styles';
-import { isArray } from 'lodash';
 
 const PREFIX = 'EditorPage';
 const CONTROLS_HEIGHT = 60;

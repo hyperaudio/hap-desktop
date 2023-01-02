@@ -15,12 +15,18 @@ import JSZip from 'jszip';
 import ReactPlayer from 'react-player';
 import { EditorState, ContentState, RawDraftContentBlock, convertFromRaw } from 'draft-js';
 import { v4 as uuidv4 } from 'uuid';
-
-import { Button, Box, Card, Container, Grid, GridProps, Typography, Stack } from '@mui/material';
-import { styled, useTheme } from '@mui/material/styles';
-import AddIcon from '@mui/icons-material/Add';
-import FileOpenIcon from '@mui/icons-material/FileOpen';
 import { Pinwheel } from '@uiball/loaders';
+
+import AddIcon from '@mui/icons-material/Add';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Container from '@mui/material/Container';
+import FileOpenIcon from '@mui/icons-material/FileOpen';
+import Grid from '@mui/material/Grid';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import { GridProps } from '@mui/material';
+import { styled, useTheme } from '@mui/material/styles';
 
 import { Editor, createEntityMap } from '@/modules';
 import { Player } from '@/components';

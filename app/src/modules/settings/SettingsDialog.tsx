@@ -1,18 +1,16 @@
 import { ReactElement, Ref, forwardRef, useState, useCallback } from 'react';
 
-import {
-  AppBar,
-  Dialog,
-  DialogContent,
-  DialogProps,
-  DialogTitle,
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
-  Toolbar,
-} from '@mui/material';
+import AppBar from '@mui/material/AppBar';
 import CloseIcon from '@mui/icons-material/Close';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import IconButton from '@mui/material/IconButton';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import Toolbar from '@mui/material/Toolbar';
+import { DialogProps } from '@mui/material';
 
 import { ColorSwitch, ModeSwitch } from '@/components';
 

@@ -2,7 +2,13 @@ import { Outlet } from 'react-router-dom';
 import { PropsWithChildren, useMemo } from 'react';
 import { useAtom } from 'jotai';
 
-import { AppBar, Box, CssBaseline, Color, Drawer, PaletteMode, Paper, Toolbar } from '@mui/material';
+import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
+import CssBaseline from '@mui/material/CssBaseline';
+import Drawer from '@mui/material/Drawer';
+import Paper from '@mui/material/Paper';
+import Toolbar from '@mui/material/Toolbar';
+import { Color, PaletteMode } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 
 import { StatusBar, ToolBar } from '@/modules';
