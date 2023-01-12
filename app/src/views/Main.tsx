@@ -5,13 +5,12 @@ import { useAtom } from 'jotai';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
-import Drawer from '@mui/material/Drawer';
 import Paper from '@mui/material/Paper';
 import Toolbar from '@mui/material/Toolbar';
 import { Color, PaletteMode } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 
-import { StatusBar, ToolBar } from '@/modules';
+import { PlaybackBar, TabBar, PrefControls } from '@/modules';
 import { createMuiTheme } from '@/themes';
 import { settingsModeAtom, settingsColorAtom } from '@/state';
 
@@ -24,32 +23,43 @@ export const MainView: React.FC<PropsWithChildren> = () => {
     [color, mode, createMuiTheme],
   );
 
-  const SIDE_WIDTH = useMemo(() => `calc(${theme.spacing(6)} + 1px)`, [theme]);
-
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      <AppBar
+        component="header"
+        elevation={0}
+        position="fixed"
+        sx={theme => ({
+          bgcolor: 'background.paper',
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          bottom: 'auto',
+          left: 0,
+          right: 0,
+          top: 0,
+          width: 'auto',
+        })}
+      >
+        <TabBar />
+      </AppBar>
       <Paper sx={{ borderRadius: 0, height: '100vh' }}>
-        <Drawer
-          open
+        <Box
           sx={{
-            flexShrink: 0,
-            whiteSpace: 'nowrap',
-            boxSizing: 'border-box',
-            overflowX: 'hidden',
-            width: SIDE_WIDTH,
-            '& .MuiDrawer-paper': {
-              width: SIDE_WIDTH,
-              overflowX: 'hidden',
-            },
+            bottom: '56px',
+            display: 'flex',
+            flexDirection: 'column',
+            // justifyContent: 'center',
+            left: 0,
+            overflow: 'auto',
+            position: 'absolute',
+            right: 0,
+            scrollBehavior: 'smooth',
+            top: '48px',
           }}
-          variant="permanent"
         >
-          <ToolBar />
-        </Drawer>
-        <Box component="main" sx={{ bottom: 0, left: SIDE_WIDTH, p: 3, position: 'fixed', right: 0, top: 0 }}>
+          <Toolbar />
           <Outlet />
-          <Toolbar variant="dense" />
+          <Toolbar />
         </Box>
       </Paper>
       <AppBar
@@ -57,19 +67,16 @@ export const MainView: React.FC<PropsWithChildren> = () => {
         elevation={0}
         position="fixed"
         sx={theme => ({
-          // borderTop: `1px solid ${theme.palette.divider}`,
-          bgcolor: 'transparent',
+          bgcolor: 'background.paper',
+          borderTop: `1px solid ${theme.palette.divider}`,
           bottom: 0,
-          left: SIDE_WIDTH,
-          pointerEvents: 'none',
+          left: 0,
           right: 0,
           top: 'auto',
           width: 'auto',
         })}
       >
-        <Toolbar variant="dense">
-          <StatusBar />
-        </Toolbar>
+        <PlaybackBar />
       </AppBar>
     </ThemeProvider>
   );

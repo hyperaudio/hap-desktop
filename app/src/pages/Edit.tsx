@@ -25,11 +25,11 @@ import FileOpenIcon from '@mui/icons-material/FileOpen';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { GridProps } from '@mui/material';
+import { BoxProps } from '@mui/material';
 import { styled, useTheme } from '@mui/material/styles';
 
 import { Editor, createEntityMap } from '@/modules';
-import { Player } from '@/components';
+import { Video } from '@/components';
 
 const PREFIX = 'EditorPage';
 const CONTROLS_HEIGHT = 60;
@@ -46,15 +46,9 @@ const classes = {
   transcript: `${PREFIX}-transcript`,
 };
 
-const Root = styled(Grid, {
+const Root = styled(Box, {
   // shouldForwardProp: (prop: any) => prop !== 'isActive',
-})<GridProps>(({ theme }) => ({
-  bottom: 0,
-  left: 0,
-  position: 'absolute',
-  right: 0,
-  overflow: 'auto',
-  top: 0,
+})<BoxProps>(({ theme }) => ({
   [`& .${classes.editor}`]: {
     alignItems: 'center',
     display: 'flex',
@@ -318,7 +312,7 @@ export const EditPage: React.FC = () => {
   }, [div, pip]);
 
   return (
-    <Root container className={classes.root} alignItems="stretch" alignContent="stretch">
+    <Root className={classes.root} alignItems="stretch" alignContent="stretch">
       {!initialState ? (
         <Grid item xs sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
           <Box textAlign="center">
@@ -349,55 +343,47 @@ export const EditPage: React.FC = () => {
           </Box>
         </Grid>
       ) : (
-        <Grid item container>
-          <Grid item xs={12} md={4} order={{ xs: 1, md: 2 }}>
-            {url ? (
-              <Box sx={{ position: 'fixed', top: 0, right: 0, width: '33%' }}>
-                <Player
-                  ref={player}
-                  {...{
-                    url,
-                    playing,
-                    play,
-                    pause,
-                    buffering,
-                    setBuffering,
-                    time,
-                    setTime,
-                    duration,
-                    setDuration,
-                    pip,
-                    setPip,
-                    hideVideo,
-                    setHideVideo,
-                    seekTime,
-                    setSeekTime,
-                  }}
-                />
-              </Box>
-            ) : null}
-          </Grid>
-          <Grid item xs={12} md={8} order={{ xs: 2, md: 1 }}>
-            {/* <Container maxWidth="lg"> */}
-            {/* <Box className={classes.transcript} sx={{ overflow: 'auto', display: 'block' }}> */}
-            <Container ref={div} fixed maxWidth="sm">
-              {initialState ? (
-                <Editor
-                  {...{ initialState, time, seekTo, speakers, setSpeakers, playing, play, pause }}
-                  autoScroll
-                  onChange={setDraft}
-                  playheadDecorator={noKaraoke ? null : undefined}
-                />
-              ) : error ? (
-                <p>Error: {error?.message}</p>
-              ) : (
-                <p></p>
-              )}
-            </Container>
-            {/* </Box> */}
-            {/* </Container> */}
-          </Grid>
-        </Grid>
+        <>
+          {url ? (
+            <Box sx={{ position: 'fixed', top: 0, right: 0, width: '33%' }}>
+              <Video
+                ref={player}
+                {...{
+                  url,
+                  playing,
+                  play,
+                  pause,
+                  buffering,
+                  setBuffering,
+                  time,
+                  setTime,
+                  duration,
+                  setDuration,
+                  pip,
+                  setPip,
+                  hideVideo,
+                  setHideVideo,
+                  seekTime,
+                  setSeekTime,
+                }}
+              />
+            </Box>
+          ) : null}
+          <Container ref={div} fixed maxWidth="sm">
+            {initialState ? (
+              <Editor
+                {...{ initialState, time, seekTo, speakers, setSpeakers, playing, play, pause }}
+                autoScroll
+                onChange={setDraft}
+                playheadDecorator={noKaraoke ? null : undefined}
+              />
+            ) : error ? (
+              <p>Error: {error?.message}</p>
+            ) : (
+              <></>
+            )}
+          </Container>
+        </>
       )}
     </Root>
   );

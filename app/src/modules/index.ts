@@ -1,4 +1,4 @@
+export * from './PlaybackBar';
+export * from './SettingsDialog';
+export * from './TabBar';
 export * from './editor';
-export * from './settings/SettingsDialog';
-export * from './statusbar/Statusbar';
-export * from './toolbar/Toolbar';

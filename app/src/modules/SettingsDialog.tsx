@@ -1,4 +1,4 @@
-import { ReactElement, Ref, forwardRef, useState, useCallback } from 'react';
+import { ReactElement, useState } from 'react';
 
 import AppBar from '@mui/material/AppBar';
 import CloseIcon from '@mui/icons-material/Close';

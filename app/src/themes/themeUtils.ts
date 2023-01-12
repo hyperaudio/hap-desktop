@@ -26,8 +26,8 @@ export const createMuiTheme = (payload: createMuiThemeProps) => {
   const palette: Palette = {
     ...p,
     background: {
-      paper: isDark ? darken(0.025, grey[900]) : 'white',
-      default: isDark ? lighten(0.025, grey[900]) : 'white',
+      paper: isDark ? '#212325' : 'white',
+      default: isDark ? '#11161d' : 'white',
     },
     primary: {
       ...p.primary,
@@ -171,7 +171,10 @@ export const createMuiTheme = (payload: createMuiThemeProps) => {
           }
           body: {
             color: ${palette.text.primary};
-            background-color: ${palette.background.paper};
+            background-color: transparent;
+            radial-gradient(circle, rgba(15,15,66,1) 20%, rgba(0,212,255,1) 100%);
+            background: radial-gradient(ellipse at top, ${palette.background.default}, transparent),
+            radial-gradient(ellipse at bottom, ${palette.background.paper}, transparent);
           }
       `,
       },
@@ -203,8 +206,11 @@ export const createMuiTheme = (payload: createMuiThemeProps) => {
         },
         styleOverrides: {
           root: {
-            color: palette.text.primary,
+            color: palette.text.secondary,
             borderRadius: t.shape.borderRadius,
+            '&:hover': {
+              color: palette.text.primary,
+            },
           },
           sizeSmall: {
             padding: t.spacing(0.5),
@@ -238,6 +244,27 @@ export const createMuiTheme = (payload: createMuiThemeProps) => {
           },
         },
       },
+      MuiSlider: {
+        styleOverrides: {
+          root: {
+            color: palette.text.primary,
+          },
+          thumb: {
+            '&:hover': {
+              boxShadow: `0 0 0 8px ${palette.action.hover}`,
+            },
+            '&.Mui-focusVisible': {
+              boxShadow: 'none',
+            },
+          },
+          rail: {},
+        },
+      },
+      MuiStack: {
+        defaultProps: {
+          spacing: 1,
+        },
+      },
       MuiSvgIcon: {
         defaultProps: {
           fontSize: 'small',
@@ -246,7 +273,7 @@ export const createMuiTheme = (payload: createMuiThemeProps) => {
       MuiTooltip: {
         defaultProps: {
           enterDelay: 500,
-          leaveDelay: 200,
+          leaveDelay: 0,
         },
         styleOverrides: {
           tooltip: {

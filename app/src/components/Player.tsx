@@ -143,7 +143,7 @@ export const Player = forwardRef(
           }}
           onClick={e => e.stopPropagation()}
         >
-          <Stack spacing={2} direction="row" sx={{ alignItems: 'center', width: '100%' }}>
+          <Stack direction="row" sx={{ alignItems: 'center', width: '100%' }}>
             {buffering && seekTime !== time ? (
               <IconButton onClick={pause} color="inherit">
                 {seekTime - time > 0 ? <FastForwardIcon /> : <FastRewindIcon />}

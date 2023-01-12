@@ -41,7 +41,6 @@ const classes = {
 };
 
 const Root = styled(Box)(({ theme }) => ({
-  ...theme.typography.body2,
   [`div[data-block='true'] + div[data-block='true']`]: {
     marginTop: theme.spacing(3),
   },
