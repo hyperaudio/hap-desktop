@@ -64,8 +64,8 @@ export const TabBar: React.FC<TabBarProps> = ({ ...props }) => {
         <Box>
           <Typography className={classes.title} color="text.primary" component="h1" variant="h6">
             <span
-              contentEditable
-              spellCheck={false}
+              // contentEditable
+              // spellCheck={false}
               className={classes.contentEditable}
               onBlur={e => onSaveTitle(e)}
             >{`Project name`}</span>
