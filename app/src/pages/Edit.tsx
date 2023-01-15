@@ -9,8 +9,6 @@ import {
   ipcRenderer,
 } from 'electron';
 import { readFileSync, createWriteStream } from 'fs';
-import path from 'path';
-import { strict as assert } from 'node:assert';
 import JSZip from 'jszip';
 import ReactPlayer from 'react-player';
 import { EditorState, ContentState, RawDraftContentBlock, convertFromRaw } from 'draft-js';
@@ -30,6 +28,7 @@ import { styled, useTheme } from '@mui/material/styles';
 
 import { Editor, createEntityMap } from '@/modules';
 import { Video } from '@/components';
+import { ElectronUtils } from '@/utils';
 
 const PREFIX = 'EditorPage';
 const CONTROLS_HEIGHT = 60;
@@ -180,56 +179,6 @@ export const EditPage: React.FC = () => {
   const [filePath, setFilePath] = useState<string | undefined>();
   // console.log({ filePath });
 
-  const handleSave = useCallback(
-    async (saveAs: boolean = false) => {
-      // if (!blocks || blocks.length === 0) return;
-
-      setSaving(true);
-
-      try {
-        const defaultPath = path.join(await homeDirectory(), 'Untitled.hyperaudio');
-        console.log({ filePath, saveAs, 'saveAs || !filePath': saveAs || !filePath, defaultPath });
-
-        const writeFilePath =
-          saveAs || !filePath
-            ? (await (
-                await writeFile({
-                  title: 'Save Hyperaudio file as…',
-                  defaultPath,
-                  properties: ['createDirectory', 'showOverwriteConfirmation'],
-                  filters: [
-                    { name: 'Hyperaudio Files', extensions: ['hyperaudio'] },
-                    { name: 'All Files', extensions: ['*'] },
-                  ],
-                })
-              ).filePath) ?? defaultPath
-            : filePath ?? defaultPath;
-
-        assert.notEqual(writeFilePath, '');
-        setFilePath(writeFilePath);
-
-        const zip = JSZip();
-        zip.file('metadata.json', JSON.stringify(metadata));
-        zip.file(`transcript/${metadata.id}.json`, JSON.stringify({ speakers, blocks: draft?.blocks ?? [] }));
-        Object.keys(media).forEach(id => zip.file(`media/${id}`, media[id].buffer));
-
-        let timeout = setTimeout(() => setSaving(false), 5000);
-        await zip
-          .generateNodeStream({ type: 'nodebuffer', streamFiles: true }, metadata => {
-            console.log('TODO progress', metadata);
-            clearTimeout(timeout);
-            timeout = setTimeout(() => setSaving(false), 5000);
-          })
-          .pipe(createWriteStream(writeFilePath));
-      } catch (error) {
-        console.error(error);
-        setError(error as Error);
-        setSaving(false);
-      }
-      // setSaving(false);
-    },
-    [metadata, media, speakers, draft, filePath],
-  );
 
   const handleOpen = useCallback(async () => {
     try {
@@ -283,12 +232,31 @@ export const EditPage: React.FC = () => {
   useEffect(() => {
     ipcRenderer.on('menu-action', (_, action) => {
       console.log('menu-action', action);
+
+      const project = {
+        metadata,
+        media,
+        transcript: {
+          blocks: draft?.blocks,
+          speakers,
+        },
+      };
+
       switch (action) {
         case 'save':
-          handleSave(false);
+          ElectronUtils.handleFileSave(project, {
+            onChangeFilePath: str => setFilePath(str),
+            onSaveExit: () => setSaving(false),
+            onSaveStart: () => setSaving(true),
+          });
           break;
         case 'save-as':
-          handleSave(true);
+          ElectronUtils.handleFileSave(project, {
+            onChangeFilePath: str => setFilePath(str),
+            onSaveExit: () => setSaving(false),
+            onSaveStart: () => setSaving(true),
+            shouldSaveAs: true,
+          });
           break;
         case 'open':
           handleOpen();
