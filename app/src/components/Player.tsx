@@ -1,7 +1,7 @@
-import React, { useMemo, useCallback, useRef, MutableRefObject, useState, forwardRef, ForwardedRef } from 'react';
 import ReactPlayer from 'react-player';
 import TC from 'smpte-timecode';
 import { isArray } from 'lodash';
+import { useMemo, useCallback, forwardRef, ForwardedRef } from 'react';
 
 import Box from '@mui/material/Box';
 import FastForwardIcon from '@mui/icons-material/FastForward';

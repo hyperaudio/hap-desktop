@@ -29,7 +29,7 @@ export const PlaybackBar: React.FC<PlaybackBarProps> = ({ ...props }) => {
         </Grid>
         <Grid item xs={6}>
           <Stack direction="row" alignItems="center">
-            <Container maxWidth="sm">
+            <Container fixed maxWidth="sm">
               <PlaybackSlider />
             </Container>
           </Stack>

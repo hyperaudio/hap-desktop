@@ -2,7 +2,6 @@ import ReactPlayer from 'react-player';
 import { ForwardedRef, forwardRef, useCallback, useMemo } from 'react';
 
 import Box from '@mui/material/Box';
-import Grow from '@mui/material/Grow';
 
 const PREFIX = 'Video';
 const classes = {
@@ -65,37 +64,37 @@ export const Video = forwardRef(
     const onEnablePIP = useCallback(() => setPip(true), []);
     const onProgress = useCallback(({ playedSeconds }: { playedSeconds: number }) => setTime(playedSeconds), [setTime]);
 
-    return url ? (
+    if (!url) return null;
+
+    return (
       <Box className={classes.stage} onClick={playing === true ? pause : play}>
         {!hideVideo && !pip && (
           <svg width="100%" viewBox={`0 0 16 9`} fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect width={16} height={9} />
           </svg>
         )}
-        <Grow in={!hideVideo || pip}>
-          <Box className={classes.playerWrapper}>
-            <ReactPlayer
-              className={classes.player}
-              config={config}
-              height="100%"
-              onBuffer={onBuffer}
-              onBufferEnd={onBufferEnd}
-              onDisablePIP={onDisablePIP}
-              onDuration={onDuration}
-              onEnablePIP={onEnablePIP}
-              onPlay={play}
-              onProgress={onProgress}
-              playing={playing}
-              progressInterval={100}
-              ref={ref}
-              style={{ lineHeight: 0, visibility: hideVideo || pip ? 'hidden' : 'visible' }}
-              url={url}
-              width="100%"
-            />
-          </Box>
-        </Grow>
+        <Box className={classes.playerWrapper}>
+          <ReactPlayer
+            className={classes.player}
+            config={config}
+            height="100%"
+            onBuffer={onBuffer}
+            onBufferEnd={onBufferEnd}
+            onDisablePIP={onDisablePIP}
+            onDuration={onDuration}
+            onEnablePIP={onEnablePIP}
+            onPlay={play}
+            onProgress={onProgress}
+            playing={playing}
+            progressInterval={100}
+            ref={ref}
+            style={{ lineHeight: 0, visibility: hideVideo || pip ? 'hidden' : 'visible' }}
+            url={url}
+            width="100%"
+          />
+        </Box>
       </Box>
-    ) : null;
+    );
   },
 );
 

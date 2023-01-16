@@ -45,7 +45,7 @@ const Root = styled(Box)(({ theme }) => ({
     marginTop: theme.spacing(3),
   },
   [`div[data-block='true']`]: {
-    paddingLeft: `${SPEAKER_AREA_WIDTH}px`,
+    // paddingLeft: `${SPEAKER_AREA_WIDTH}px`,
     position: 'relative',
   },
   // [`div[data-block='true'] .Playhead ~ span`]: {
@@ -72,7 +72,8 @@ const Root = styled(Box)(({ theme }) => ({
     cursor: 'pointer',
     fontWeight: '600',
     height: `${SPEAKER_AREA_HEIGHT}px`,
-    left: 0,
+    right: '100%',
+    marginRight: theme.spacing(2),
     lineHeight: `${SPEAKER_AREA_HEIGHT}px`,
     overflow: 'hidden',
     paddingRight: theme.spacing(1.44),
@@ -87,7 +88,9 @@ const Root = styled(Box)(({ theme }) => ({
     color: theme.palette.primary.main,
     display: 'none',
     fontWeight: '600',
-    left: `${SPEAKER_AREA_WIDTH}px`,
+    // right: `${SPEAKER_AREA_WIDTH}px`,
+    right: '100%',
+    marginRight: theme.spacing(2),
     lineHeight: 1,
     overflow: 'visible',
     pointerEvents: 'none',
@@ -223,7 +226,7 @@ export const Editor = ({
         const my = event.clientY;
         const { x: bx, y: by } = target.getBoundingClientRect();
 
-        const x = mx - bx;
+        const x = mx - bx - SPEAKER_AREA_WIDTH;
         const y = my - by;
 
         if (x < SPEAKER_AREA_WIDTH - 10 && y < SPEAKER_AREA_HEIGHT) {
@@ -427,6 +430,7 @@ export const Editor = ({
               position: 'relative',
               transform: 'translate(-12px, -4px) !important',
               width: SPEAKER_AREA_WIDTH,
+              // marginLeft: SPEAKER_AREA_WIDTH * -1,
             },
             elevation: 2,
           }}
