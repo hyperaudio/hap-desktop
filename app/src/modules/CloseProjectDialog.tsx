@@ -1,4 +1,5 @@
 import { ReactElement, useState } from 'react';
+import { useAtom } from 'jotai';
 
 import AppBar from '@mui/material/AppBar';
 import Button from '@mui/material/Button';
@@ -12,7 +13,7 @@ import IconButton from '@mui/material/IconButton';
 import Toolbar from '@mui/material/Toolbar';
 import { DialogProps } from '@mui/material';
 
-import { ColorSwitch, ModeSwitch } from '@/components';
+import { filePathAtom } from '@/state';
 
 const PREFIX = 'CloseProjectDialog';
 const classes = {
@@ -24,8 +25,28 @@ interface CloseProjectDialogProps extends DialogProps {
 }
 
 export const CloseProjectDialog: React.FC<CloseProjectDialogProps> = ({ onClose, ...props }) => {
+  const [, setFilePath] = useAtom(filePathAtom);
+
+  const onCancel = () => {
+    onClose();
+  };
+  const onConfirm = () => {
+    console.log(`TODO: Save changes`);
+    setFilePath(null);
+    onClose();
+  };
+
   return (
-    <Dialog className={classes.root} fullWidth maxWidth="xs" onClose={onClose} {...props}>
+    <Dialog
+      className={classes.root}
+      fullWidth
+      maxWidth="xs"
+      onClose={onClose}
+      PaperProps={{
+        sx: { maxWidth: '300px' },
+      }}
+      {...props}
+    >
       {props.open && (
         <>
           <AppBar position="absolute" color="transparent" elevation={0}>
@@ -40,8 +61,8 @@ export const CloseProjectDialog: React.FC<CloseProjectDialogProps> = ({ onClose,
             <DialogContentText>Project will be closed.</DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={onClose}>Cancel</Button>
-            <Button onClick={onClose} color="primary" variant="contained">
+            <Button onClick={onCancel}>Cancel</Button>
+            <Button onClick={onConfirm} color="primary" variant="contained">
               Close
             </Button>
           </DialogActions>
