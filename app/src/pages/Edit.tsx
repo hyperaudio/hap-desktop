@@ -1,34 +1,25 @@
 import React, { useState, useMemo, useRef, useCallback, useEffect, useLayoutEffect, MutableRefObject } from 'react';
-import {
-  FileFilter,
-  IpcRendererEvent,
-  OpenDialogOptions,
-  OpenDialogReturnValue,
-  SaveDialogOptions,
-  SaveDialogReturnValue,
-  ipcRenderer,
-} from 'electron';
-import { readFileSync, createWriteStream } from 'fs';
-import JSZip from 'jszip';
 import ReactPlayer from 'react-player';
 import { EditorState, ContentState, RawDraftContentBlock, convertFromRaw } from 'draft-js';
-import { v4 as uuidv4 } from 'uuid';
 import { Pinwheel } from '@uiball/loaders';
+import { ipcRenderer } from 'electron';
+import { useAtom } from 'jotai';
+import { useNavigate } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
 
-import AddIcon from '@mui/icons-material/Add';
+import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
-import FileOpenIcon from '@mui/icons-material/FileOpen';
 import Grid from '@mui/material/Grid';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
+import Toolbar from '@mui/material/Toolbar';
 import { BoxProps } from '@mui/material';
 import { styled, useTheme } from '@mui/material/styles';
 
-import { Editor, createEntityMap } from '@/modules';
+import { Editor, createEntityMap, PlaybackBar, TabBar } from '@/modules';
+import { ElectronUtils, FilesystemUtils } from '@/utils';
+import { Project } from '@/models';
 import { Video } from '@/components';
-import { ElectronUtils } from '@/utils';
+import { filePathAtom } from '@/state';
 
 const PREFIX = 'EditorPage';
 const CONTROLS_HEIGHT = 60;
@@ -48,6 +39,12 @@ const classes = {
 const Root = styled(Box, {
   // shouldForwardProp: (prop: any) => prop !== 'isActive',
 })<BoxProps>(({ theme }) => ({
+  alignItems: 'center',
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100vh',
+  justifyContent: 'center',
+  width: '100%',
   [`& .${classes.editor}`]: {
     alignItems: 'center',
     display: 'flex',
@@ -128,10 +125,13 @@ const Root = styled(Box, {
 
 export const EditPage: React.FC = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
 
+  const [filePath, setFilePath] = useAtom(filePathAtom);
+
+  const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<Error>();
 
   const [metadata, setMetadata] = useState<Record<string, any>>({ id: uuidv4() });
   const [media, setMedia] = useState<Record<string, any>>({});
@@ -176,95 +176,25 @@ export const EditPage: React.FC = () => {
     [player],
   );
 
-  const [filePath, setFilePath] = useState<string | undefined>();
-  // console.log({ filePath });
-
-
-  const handleOpen = useCallback(async () => {
+  const handleOpen = useCallback(async (path: string) => {
     try {
-      const {
-        filePaths: [readFilePath],
-      } = await openFile({
-        title: 'Open Hyperaudio file…',
-        properties: ['openFile', 'promptToCreate', 'createDirectory'],
-        filters: [
-          { name: 'Hyperaudio Files', extensions: ['hyperaudio'] },
-          { name: 'All Files', extensions: ['*'] },
-        ],
-      });
-      console.log({ readFilePath });
-      setFilePath(readFilePath);
+      if (!path) return;
+      setLoading(true);
 
-      if (readFilePath) setLoading(true);
+      const project = await FilesystemUtils.readFile(path);
+      if (!project) return;
 
-      const zip = await JSZip.loadAsync(readFileSync(readFilePath));
-      const media = await Promise.all(
-        zip.file(/^media\//).map(async file => ({
-          id: file.name.split('/').pop()?.split('.').reverse().pop(),
-          name: file.name,
-          buffer: await file.async('arraybuffer'),
-          url: URL.createObjectURL(await file.async('blob')),
-        })),
-      );
-
-      console.log({ media });
-      setUrl(media[0].url);
-      setMedia(media.reduce((acc, m) => ({ ...acc, [m.id ?? '0']: m }), {}));
-
-      const metadata = JSON.parse((await zip?.file('metadata.json')?.async('text')) ?? '{}');
-      const transcripts = await Promise.all(
-        zip.file(/^transcript\//).map(async file => ({
-          name: file.name,
-          data: JSON.parse((await file.async('text')) ?? '{}'),
-        })),
-      );
-
-      console.log({ metadata, transcripts });
-      setMetadata(metadata);
+      const { media, metadata, transcripts } = project;
       setData(transcripts[0].data as any);
+      setMedia(media.reduce((acc, m) => ({ ...acc, [m.id ?? '0']: m }), {}));
+      setMetadata(metadata);
       setSpeakers(transcripts[0].data.speakers);
+      setUrl(media[0].url);
     } catch (error) {
+      console.error(`handleOpen error: ${error}`);
       setError(error as Error);
     }
     setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    ipcRenderer.on('menu-action', (_, action) => {
-      console.log('menu-action', action);
-
-      const project = {
-        metadata,
-        media,
-        transcript: {
-          blocks: draft?.blocks,
-          speakers,
-        },
-      };
-
-      switch (action) {
-        case 'save':
-          ElectronUtils.handleFileSave(project, {
-            onChangeFilePath: str => setFilePath(str),
-            onSaveExit: () => setSaving(false),
-            onSaveStart: () => setSaving(true),
-          });
-          break;
-        case 'save-as':
-          ElectronUtils.handleFileSave(project, {
-            onChangeFilePath: str => setFilePath(str),
-            onSaveExit: () => setSaving(false),
-            onSaveStart: () => setSaving(true),
-            shouldSaveAs: true,
-          });
-          break;
-        case 'open':
-          handleOpen();
-          break;
-      }
-    });
-
-    return (() => ipcRenderer.removeAllListeners('menu-action')) as unknown as void; // FIXME
   }, []);
 
   const noKaraoke = false;
@@ -279,90 +209,173 @@ export const EditPage: React.FC = () => {
     setTop(value);
   }, [div, pip]);
 
+  useEffect(() => {
+    ipcRenderer.on('menu-action', (_, action) => {
+      console.log('menu-action', action);
+      switch (action) {
+        case 'save':
+          ElectronUtils.getWritePath({}).then(path => {
+            if (!path) return;
+            const project: Project = {
+              metadata,
+              media,
+              transcripts: [
+                {
+                  speakers,
+                  // @ts-ignore
+                  blocks: draft?.blocks ?? [],
+                },
+              ],
+            };
+            FilesystemUtils.writeFile(project, { path });
+          });
+          break;
+        case 'save-as':
+          ElectronUtils.getWritePath({ shouldSaveAs: true }).then(path => {
+            if (!path) return;
+            const project: Project = {
+              metadata,
+              media,
+              transcripts: [
+                {
+                  speakers,
+                  // @ts-ignore
+                  blocks: draft?.blocks ?? [],
+                },
+              ],
+            };
+            console.log({ project });
+
+            FilesystemUtils.writeFile(project, { path });
+          });
+          break;
+        case 'open':
+          ElectronUtils.getReadPath().then(path => {
+            if (path) setFilePath(path);
+          });
+          break;
+      }
+    });
+    return (() => ipcRenderer.removeAllListeners('menu-action')) as unknown as void; // FIXME
+  }, [filePath]);
+
+  useEffect(() => {
+    if (filePath) {
+      handleOpen(filePath);
+    } else {
+      navigate('/', { replace: true });
+    }
+  }, [filePath]);
+
   return (
-    <Root className={classes.root} alignItems="stretch" alignContent="stretch">
-      {!initialState ? (
-        <Grid item xs sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
-          <Box textAlign="center">
-            {loading ? (
-              <Pinwheel size={36} lineWeight={2.5} speed={1.5} color={theme.palette.primary.main} />
-            ) : (
-              <Stack direction="column" spacing={2}>
-                <Typography gutterBottom variant="h6">
-                  No file to show
-                </Typography>
-                <Button
-                  startIcon={<FileOpenIcon fontSize="small" sx={{ color: 'text.secondary' }} />}
-                  color="primary"
-                  disabled={loading}
-                  size="small"
-                  onClick={handleOpen}
+    <>
+      <Root className={classes.root} alignItems="stretch" alignContent="stretch">
+        {!initialState ? (
+          <>{loading && <Pinwheel size={36} lineWeight={2.5} speed={1.5} color={theme.palette.primary.main} />}</>
+        ) : (
+          <>
+            <AppBar
+              component="header"
+              elevation={0}
+              position="fixed"
+              sx={theme => ({
+                bgcolor: 'background.paper',
+                borderBottom: `1px solid ${theme.palette.divider}`,
+                bottom: 'auto',
+                left: 0,
+                right: 0,
+                top: 0,
+                width: 'auto',
+              })}
+            >
+              <TabBar />
+            </AppBar>
+
+            <Box
+              sx={{
+                bottom: '64px',
+                left: 0,
+                overflow: 'auto',
+                position: 'fixed',
+                right: 0,
+                scrollBehavior: 'smooth',
+                top: '48px',
+              }}
+            >
+              <Toolbar />
+              <Container maxWidth={false}>
+                <Grid container>
+                  <Grid item xs={12} sm={3} />
+                  <Grid item xs={12} sm={6}>
+                    <Container ref={div} fixed maxWidth="sm">
+                      {initialState ? (
+                        <Editor
+                          {...{ initialState, time, seekTo, speakers, setSpeakers, playing, play, pause }}
+                          autoScroll
+                          onChange={setDraft}
+                          playheadDecorator={noKaraoke ? null : undefined}
+                        />
+                      ) : error ? (
+                        <p>Error: {error?.message}</p>
+                      ) : (
+                        <></>
+                      )}
+                    </Container>
+                  </Grid>
+                  <Grid item xs={12} sm={3} />
+                </Grid>
+              </Container>
+              <Toolbar />
+              {url && (
+                <Box
+                  sx={{ position: 'fixed', bottom: '74px', left: '50%', transform: 'translateX(-50%)', width: '33%' }}
                 >
-                  Open existing
-                </Button>
-                <Typography variant="body2" color="text.secondary">
-                  or
-                </Typography>
-                <Button startIcon={<AddIcon fontSize="small" sx={{ color: 'text.secondary' }} />} disabled={loading}>
-                  Create new
-                </Button>
-              </Stack>
-            )}
-          </Box>
-        </Grid>
-      ) : (
-        <>
-          {url ? (
-            <Box sx={{ position: 'fixed', top: 0, right: 0, width: '33%' }}>
-              <Video
-                ref={player}
-                {...{
-                  url,
-                  playing,
-                  play,
-                  pause,
-                  buffering,
-                  setBuffering,
-                  time,
-                  setTime,
-                  duration,
-                  setDuration,
-                  pip,
-                  setPip,
-                  hideVideo,
-                  setHideVideo,
-                  seekTime,
-                  setSeekTime,
-                }}
-              />
+                  <Video
+                    ref={player}
+                    {...{
+                      url,
+                      playing,
+                      play,
+                      pause,
+                      buffering,
+                      setBuffering,
+                      time,
+                      setTime,
+                      duration,
+                      setDuration,
+                      pip,
+                      setPip,
+                      hideVideo,
+                      setHideVideo,
+                      seekTime,
+                      setSeekTime,
+                    }}
+                  />
+                </Box>
+              )}
             </Box>
-          ) : null}
-          <Container ref={div} fixed maxWidth="sm">
-            {initialState ? (
-              <Editor
-                {...{ initialState, time, seekTo, speakers, setSpeakers, playing, play, pause }}
-                autoScroll
-                onChange={setDraft}
-                playheadDecorator={noKaraoke ? null : undefined}
-              />
-            ) : error ? (
-              <p>Error: {error?.message}</p>
-            ) : (
-              <></>
-            )}
-          </Container>
-        </>
-      )}
-    </Root>
+
+            <AppBar
+              component="footer"
+              elevation={0}
+              position="fixed"
+              sx={theme => ({
+                bgcolor: 'background.paper',
+                borderTop: `1px solid ${theme.palette.divider}`,
+                bottom: 0,
+                left: 0,
+                right: 0,
+                top: 'auto',
+                width: 'auto',
+              })}
+            >
+              <PlaybackBar />
+            </AppBar>
+          </>
+        )}
+      </Root>
+    </>
   );
 };
-
-const homeDirectory = (): Promise<string> => ipcRenderer.invoke('home-directory');
-
-const writeFile = (options: SaveDialogOptions): Promise<SaveDialogReturnValue> =>
-  ipcRenderer.invoke('write-file', options);
-
-const openFile = (options: OpenDialogOptions): Promise<OpenDialogReturnValue> =>
-  ipcRenderer.invoke('open-file', options);
 
 export default EditPage;
