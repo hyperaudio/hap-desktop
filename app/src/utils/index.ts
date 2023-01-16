@@ -1,1 +1,1 @@
-export * from './ElectronUtils';
+export * as ElectronUtils from './electron';
