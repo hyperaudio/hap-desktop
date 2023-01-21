@@ -453,5 +453,5 @@ test-files
 server/requirements.txt
 
 # Ignore build files
-severt/build
+server/build
 app/server/
