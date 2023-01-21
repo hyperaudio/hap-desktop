@@ -2,17 +2,25 @@
   "cSpell.words": [
     "Draftjs",
     "hyperaudio",
+    "Kaldi",
     "nodebuffer",
     "nodownload",
     "Parens",
     "Playhead",
     "smpte",
+    "Starlette",
     "Tdiff",
     "timecode",
     "togglefullscreen",
     "Twith",
     "uiball",
     "undocked",
-    "uuidv"
-  ]
+    "uuidv",
+    "uvicorn",
+    "vosk",
+    "websockets"
+  ],
+  "python.formatting.provider": "black",
+  "terminal.integrated.inheritEnv": false,
+  "python.terminal.activateEnvironment": true
 }

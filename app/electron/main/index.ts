@@ -39,7 +39,7 @@ async function createWindow() {
     win.loadFile(indexHtml)
   } else {
     win.loadURL(url)
-    // win.webContents.openDevTools()
+    win.webContents.openDevTools()
   }
 
   // Test actively push message to the Electron-Renderer
@@ -224,3 +224,13 @@ ipcMain.handle('open-win', (event, arg) => {
 })
 
 ipcMain.handle('ipc-test', (event, options) => console.log('ipc-test', event, options));
+
+let serverInfo = [];
+ipcMain.handle('server-info', () => serverInfo);
+
+export function publishServerInfo(info: any): void {
+  serverInfo.push(info);
+  win?.webContents.send('server', serverInfo);
+}
+
+import './server';

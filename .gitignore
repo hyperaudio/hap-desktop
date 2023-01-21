@@ -448,3 +448,10 @@ $RECYCLE.BIN/
 
 # Ignore test files
 test-files
+
+# Ignore generated requirements.txt
+server/requirements.txt
+
+# Ignore build files
+severt/build
+app/server/
