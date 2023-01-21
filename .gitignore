@@ -448,3 +448,6 @@ $RECYCLE.BIN/
 
 # Ignore test files
 test-files
+
+app/server
+server/requirements.txt
