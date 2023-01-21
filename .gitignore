@@ -455,3 +455,6 @@ server/requirements.txt
 # Ignore build files
 server/build
 app/server/
+
+# Ignore test models
+app/models
