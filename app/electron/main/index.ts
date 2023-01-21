@@ -224,3 +224,5 @@ ipcMain.handle('open-win', (event, arg) => {
 })
 
 ipcMain.handle('ipc-test', (event, options) => console.log('ipc-test', event, options));
+
+import './vosk-test';
