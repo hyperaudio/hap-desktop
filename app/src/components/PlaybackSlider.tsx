@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import Slider from '@mui/material/Slider';
 import IconButton from '@mui/material/IconButton';
@@ -8,6 +8,7 @@ import FeaturedVideoIcon from '@mui/icons-material/FeaturedVideo';
 import Stack from '@mui/material/Stack';
 import { BoxProps, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import { formatTime } from '@/utils';
 
 interface PlaybackSliderProps extends BoxProps {}
 
@@ -40,21 +41,27 @@ const Root = styled(Box)(({ theme }) => ({
 }));
 
 export const PlaybackSlider: React.FC<PlaybackSliderProps> = ({ ...props }) => {
-  const [value, setValue] = useState<number>(30);
+  const [elapsed, setElapsed] = useState<number>(0);
+  const [duration, setDuration] = useState<number>(233); // TODO: wire this
 
-  const handleChange = (event: Event, newValue: number | number[]) => {
-    setValue(newValue as number);
-  };
-
-  const elapsedTime: number = 0.32;
-  const remainingTime: number = 2.04;
+  const displayElapsed = useMemo(() => formatTime(elapsed), [elapsed]);
+  const displayRemaining = useMemo(() => formatTime(duration - elapsed), [duration, elapsed]);
 
   return (
     <Root className={classes.root}>
-      <Slider aria-label="Playhead" value={value} onChange={handleChange} size="small" valueLabelDisplay="auto" />
+      <Slider
+        aria-label="Playhead"
+        max={duration}
+        min={0}
+        onChange={(e, v) => setElapsed(v as number)}
+        size="small"
+        value={elapsed}
+        valueLabelDisplay="auto"
+        valueLabelFormat={v => formatTime(v)}
+      />
       <Box className={classes.timespan}>
-        <Typography>{elapsedTime}</Typography>
-        <Typography>-{remainingTime}</Typography>
+        <Typography>{displayElapsed}</Typography>
+        <Typography>{displayRemaining}</Typography>
       </Box>
     </Root>
   );
