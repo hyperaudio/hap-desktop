@@ -1,10 +1,13 @@
+import { useDraggable } from '@neodrag/react';
+
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Toolbar from '@mui/material/Toolbar';
-import { BoxProps, Container } from '@mui/material';
+import { Box, BoxProps, Container } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
-import { PlaybackControls, PlaybackSlider, PlaybackSettings } from '@/components';
+import { PlaybackControls, PlaybackSlider, PlaybackSettings, Player } from '@/components';
+import { useEffect, useRef } from 'react';
 
 interface PlaybackBarProps extends BoxProps {}
 
@@ -19,6 +22,13 @@ const Root = styled(Toolbar)(({ theme }) => ({
 }));
 
 export const PlaybackBar: React.FC<PlaybackBarProps> = ({ ...props }) => {
+  const draggableRef = useRef(null);
+  const { isDragging, dragState } = useDraggable(draggableRef);
+
+  useEffect(() => {
+    console.log({ isDragging, dragState });
+  }, [isDragging, dragState]);
+
   return (
     <Root className={classes.root}>
       <Grid container alignItems="center">
@@ -40,6 +50,7 @@ export const PlaybackBar: React.FC<PlaybackBarProps> = ({ ...props }) => {
           </Stack>
         </Grid>
       </Grid>
+      <Box ref={draggableRef}>Draggable</Box>
     </Root>
   );
 };

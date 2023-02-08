@@ -573,6 +573,11 @@
     prop-types "^15.8.1"
     react-is "^18.2.0"
 
+"@neodrag/react@^2.0.3":
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/@neodrag/react/-/react-2.0.3.tgz#59b3d419c87bdda660cf1770bd1ae0122a50dfd2"
+  integrity sha512-VtubEZzyB+mmi6bZYKay/UmMuWsG2rsiAV7+O7iLN4YXKOOa7TxJT3alnLRqkntII8X48h2Hs7jSjosqxuAxDQ==
+
 "@popperjs/core@^2.11.6":
   version "2.11.6"
   resolved "https://registry.npmjs.org/@popperjs/core/-/core-2.11.6.tgz"
