@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import Box from '@mui/material/Box';
 import Forward10Icon from '@mui/icons-material/Forward10';
@@ -10,7 +10,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import Replay10Icon from '@mui/icons-material/Replay10';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
-import { BoxProps } from '@mui/material';
+import { BoxProps, Slider } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
 interface PlaybackControlsProps extends BoxProps {}
@@ -45,6 +45,7 @@ const Root = styled(Box)(({ theme }) => ({
 export const PlaybackControls: React.FC<PlaybackControlsProps> = ({ ...props }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [playing, setPlaying] = useState<boolean>();
+  const [rate, setRate] = useState<number>(1);
 
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -61,6 +62,12 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({ ...props }) 
     console.log('on rewind');
   };
 
+  const displayPlaybackRate = useMemo(() => {
+    const round = Math.round(rate * 10) / 10;
+    const parsed = round < 1 ? round.toString().slice(1, 3) : round;
+    return parsed;
+  }, [rate]);
+
   return (
     <>
       <Root className={classes.root}>
@@ -73,8 +80,10 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({ ...props }) 
               aria-haspopup="true"
               aria-expanded={open ? 'true' : undefined}
               onClick={handleClick}
+              sx={theme => ({ minWidth: theme.typography.pxToRem(36) })}
             >
-              <span>✕</span>1
+              <span>✕</span>
+              {displayPlaybackRate}
             </IconButton>
           </Tooltip>
           <Tooltip title={playing ? 'Pause' : 'Play'}>
@@ -95,45 +104,35 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({ ...props }) 
         </Stack>
       </Root>
       <Menu
-        id="basic-menu"
+        MenuListProps={{ 'aria-label': 'Playback speed menu', dense: true }}
         anchorEl={anchorEl}
-        open={open}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        id="basic-menu"
         onClose={handleClose}
-        MenuListProps={{
-          'aria-label': 'Playback speed menu',
-          dense: true,
-        }}
+        open={open}
+        slotProps={{ backdrop: { style: { opacity: 0 } } }}
+        transformOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <MenuItem onClick={handleClose}>
-          <Box component="span" sx={{ fontSize: '0.5rem', mr: 1 }}>
-            ✕
-          </Box>{' '}
-          0.5
-        </MenuItem>
-        <MenuItem onClick={handleClose}>
-          <Box component="span" sx={{ fontSize: '0.5rem', mr: 1 }}>
-            ✕
-          </Box>{' '}
-          0.75
-        </MenuItem>
-        <MenuItem onClick={handleClose}>
-          <Box component="span" sx={{ fontSize: '0.5rem', mr: 1 }}>
-            ✕
-          </Box>{' '}
-          1
-        </MenuItem>
-        <MenuItem onClick={handleClose}>
-          <Box component="span" sx={{ fontSize: '0.5rem', mr: 1 }}>
-            ✕
-          </Box>{' '}
-          1.25
-        </MenuItem>
-        <MenuItem onClick={handleClose}>
-          <Box component="span" sx={{ fontSize: '0.5rem', mr: 1 }}>
-            ✕
-          </Box>{' '}
-          1.5
-        </MenuItem>
+        <Box>
+          <Slider
+            aria-label="PlaybackRateSlider"
+            max={1.5}
+            step={0.01}
+            min={0.5}
+            onChange={(e, v: number | number[]) => setRate(v as number)}
+            onChangeCommitted={() => setAnchorEl(null)}
+            orientation="vertical"
+            size="small"
+            sx={{
+              '& input[type="range"]': { WebkitAppearance: 'slider-vertical' },
+              height: '80px',
+              lineHeight: '0',
+            }}
+            value={rate}
+            valueLabelDisplay="auto"
+            valueLabelFormat={v => v}
+          />
+        </Box>
       </Menu>
     </>
   );
