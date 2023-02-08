@@ -67,33 +67,24 @@ export const Video = forwardRef(
     if (!url) return null;
 
     return (
-      <Box className={classes.stage} onClick={playing === true ? pause : play}>
-        {!hideVideo && !pip && (
-          <svg width="100%" viewBox={`0 0 16 9`} fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width={16} height={9} />
-          </svg>
-        )}
-        <Box className={classes.playerWrapper}>
-          <ReactPlayer
-            className={classes.player}
-            config={config}
-            height="100%"
-            onBuffer={onBuffer}
-            onBufferEnd={onBufferEnd}
-            onDisablePIP={onDisablePIP}
-            onDuration={onDuration}
-            onEnablePIP={onEnablePIP}
-            onPlay={play}
-            onProgress={onProgress}
-            playing={playing}
-            progressInterval={100}
-            ref={ref}
-            style={{ lineHeight: 0, visibility: hideVideo || pip ? 'hidden' : 'visible' }}
-            url={url}
-            width="100%"
-          />
-        </Box>
-      </Box>
+      <ReactPlayer
+        className={classes.player}
+        config={config}
+        height="100%"
+        onBuffer={onBuffer}
+        onBufferEnd={onBufferEnd}
+        onDisablePIP={onDisablePIP}
+        onDuration={onDuration}
+        onEnablePIP={onEnablePIP}
+        onPlay={play}
+        onProgress={onProgress}
+        playing={playing}
+        progressInterval={100}
+        ref={ref}
+        style={{ lineHeight: 0, visibility: hideVideo || pip ? 'hidden' : 'visible' }}
+        url={url}
+        width="100%"
+      />
     );
   },
 );

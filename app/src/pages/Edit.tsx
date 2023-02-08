@@ -6,13 +6,14 @@ import { ipcRenderer } from 'electron';
 import { useAtom } from 'jotai';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
+import { useDraggable } from '@neodrag/react';
 
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Toolbar from '@mui/material/Toolbar';
-import { BoxProps } from '@mui/material';
+import { BoxProps, Card } from '@mui/material';
 import { styled, useTheme } from '@mui/material/styles';
 
 import { Editor, createEntityMap, PlaybackBar, TabBar } from '@/modules';
@@ -143,6 +144,13 @@ export const EditPage: React.FC = () => {
 
   const [speakers, setSpeakers] = useState({});
   const { blocks } = data ?? {};
+
+  const draggableRef = useRef(null);
+  const { isDragging, dragState } = useDraggable(draggableRef);
+
+  useEffect(() => {
+    console.log({ isDragging, dragState });
+  }, [isDragging, dragState]);
 
   const initialState = useMemo(
     () => blocks && EditorState.createWithContent(convertFromRaw({ blocks, entityMap: createEntityMap(blocks) })),
@@ -327,8 +335,16 @@ export const EditPage: React.FC = () => {
               </Container>
               <Toolbar />
               {url && (
-                <Box
-                  sx={{ position: 'fixed', bottom: '74px', left: '50%', transform: 'translateX(-50%)', width: '33%' }}
+                <Card
+                  elevation={3}
+                  ref={draggableRef}
+                  sx={theme => ({
+                    p: 1,
+                    bottom: theme.spacing(10),
+                    position: 'fixed',
+                    right: theme.spacing(2),
+                    width: '33%',
+                  })}
                 >
                   <Video
                     ref={player}
@@ -351,7 +367,7 @@ export const EditPage: React.FC = () => {
                       setSeekTime,
                     }}
                   />
-                </Box>
+                </Card>
               )}
             </Box>
 
