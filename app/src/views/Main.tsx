@@ -8,11 +8,11 @@ import { Color, PaletteMode } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 
 import { createMuiTheme } from '@/themes';
-import { settingsModeAtom, settingsColorAtom } from '@/state';
+import { _SettingsMode, _SettingsColor } from '@/state';
 
 export const MainView: React.FC<PropsWithChildren> = () => {
-  const [color] = useAtom(settingsColorAtom);
-  const [mode] = useAtom(settingsModeAtom);
+  const [color] = useAtom(_SettingsColor);
+  const [mode] = useAtom(_SettingsMode);
 
   const theme = useMemo(
     () => createMuiTheme({ mode: mode as PaletteMode, color: color as Color }),

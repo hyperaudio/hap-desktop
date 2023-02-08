@@ -1,10 +1,10 @@
+import { useAtom } from 'jotai';
 import { useMemo, useState } from 'react';
 
 import Box from '@mui/material/Box';
 import Forward10Icon from '@mui/icons-material/Forward10';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
 import PauseIcon from '@mui/icons-material/Pause';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import Replay10Icon from '@mui/icons-material/Replay10';
@@ -12,6 +12,8 @@ import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 import { BoxProps, Slider } from '@mui/material';
 import { styled } from '@mui/material/styles';
+
+import { _PlayerPlaying } from '@/state';
 
 interface PlaybackControlsProps extends BoxProps {}
 
@@ -43,8 +45,11 @@ const Root = styled(Box)(({ theme }) => ({
 }));
 
 export const PlaybackControls: React.FC<PlaybackControlsProps> = ({ ...props }) => {
+  //shared state
+  const [playing, setPlaying] = useAtom(_PlayerPlaying);
+
+  // local state
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [playing, setPlaying] = useState<boolean>();
   const [rate, setRate] = useState<number>(1);
 
   const open = Boolean(anchorEl);

@@ -20,7 +20,7 @@ import { Editor, createEntityMap, PlaybackBar, TabBar } from '@/modules';
 import { ElectronUtils, FilesystemUtils } from '@/utils';
 import { Project } from '@/models';
 import { Video } from '@/components';
-import { filePathAtom } from '@/state';
+import { _PlayerUrl, _ProjectPath } from '@/state';
 
 const PREFIX = 'EditorPage';
 const CONTROLS_HEIGHT = 60;
@@ -128,15 +128,17 @@ export const EditPage: React.FC = () => {
   const theme = useTheme();
   const navigate = useNavigate();
 
-  const [filePath, setFilePath] = useAtom(filePathAtom);
+  // shared state
+  const [filePath, setFilePath] = useAtom(_ProjectPath);
+  const [url, setUrl] = useAtom(_PlayerUrl);
 
+  // local state
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const [metadata, setMetadata] = useState<Record<string, any>>({ id: uuidv4() });
   const [media, setMedia] = useState<Record<string, any>>({});
-  const [url, setUrl] = useState<string | undefined>();
   const [data, setData] = useState<{ speakers: { [key: string]: any } | null; blocks: RawDraftContentBlock[] | null }>({
     speakers: null,
     blocks: null,
@@ -168,7 +170,6 @@ export const EditPage: React.FC = () => {
   const [time, setTime] = useState(0);
   const [seekTime, setSeekTime] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const [duration, setDuration] = useState(0);
   const [buffering, setBuffering] = useState(false);
   const [pip, setPip] = useState(false);
 
@@ -298,7 +299,6 @@ export const EditPage: React.FC = () => {
             >
               <TabBar />
             </AppBar>
-
             <Box
               sx={{
                 bottom: '64px',
@@ -334,43 +334,7 @@ export const EditPage: React.FC = () => {
                 </Grid>
               </Container>
               <Toolbar />
-              {url && (
-                <Card
-                  elevation={3}
-                  ref={draggableRef}
-                  sx={theme => ({
-                    p: 1,
-                    bottom: theme.spacing(10),
-                    position: 'fixed',
-                    right: theme.spacing(2),
-                    width: '33%',
-                  })}
-                >
-                  <Video
-                    ref={player}
-                    {...{
-                      url,
-                      playing,
-                      play,
-                      pause,
-                      buffering,
-                      setBuffering,
-                      time,
-                      setTime,
-                      duration,
-                      setDuration,
-                      pip,
-                      setPip,
-                      hideVideo,
-                      setHideVideo,
-                      seekTime,
-                      setSeekTime,
-                    }}
-                  />
-                </Card>
-              )}
             </Box>
-
             <AppBar
               component="footer"
               elevation={0}
@@ -390,6 +354,40 @@ export const EditPage: React.FC = () => {
           </>
         )}
       </Root>
+      {url && (
+        <Card
+          elevation={3}
+          sx={{
+            bottom: theme.spacing(10),
+            p: 1,
+            position: 'fixed',
+            right: theme.spacing(2),
+            width: '33%',
+            zIndex: theme.zIndex.drawer,
+          }}
+          ref={draggableRef}
+        >
+          <Video
+            ref={player}
+            {...{
+              buffering,
+              hideVideo,
+              pause,
+              pip,
+              play,
+              playing,
+              seekTime,
+              setBuffering,
+              setHideVideo,
+              setPip,
+              setSeekTime,
+              setTime,
+              time,
+              url,
+            }}
+          />
+        </Card>
+      )}
     </>
   );
 };

@@ -1,14 +1,12 @@
 import { useMemo, useState } from 'react';
 
 import Slider from '@mui/material/Slider';
-import IconButton from '@mui/material/IconButton';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import Box from '@mui/material/Box';
-import FeaturedVideoIcon from '@mui/icons-material/FeaturedVideo';
-import Stack from '@mui/material/Stack';
 import { BoxProps, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { formatTime } from '@/utils';
+import { _PlayerDuration, _PlayerElapsed } from '@/state';
+import { useAtom } from 'jotai';
 
 interface PlaybackSliderProps extends BoxProps {}
 
@@ -41,8 +39,8 @@ const Root = styled(Box)(({ theme }) => ({
 }));
 
 export const PlaybackSlider: React.FC<PlaybackSliderProps> = ({ ...props }) => {
-  const [elapsed, setElapsed] = useState<number>(0);
-  const [duration, setDuration] = useState<number>(233); // TODO: wire this
+  const [elapsed, setElapsed] = useAtom(_PlayerElapsed);
+  const [duration] = useAtom(_PlayerDuration);
 
   const displayElapsed = useMemo(() => formatTime(elapsed), [elapsed]);
   const displayRemaining = useMemo(() => formatTime(duration - elapsed), [duration, elapsed]);

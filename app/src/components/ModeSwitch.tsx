@@ -9,12 +9,12 @@ import MenuItem from '@mui/material/MenuItem';
 import { ButtonProps, PaletteMode } from '@mui/material';
 
 import { modes } from '@/config';
-import { settingsModeAtom } from '@/state';
+import { _SettingsMode } from '@/state';
 
 interface ModeSwitchProps extends ButtonProps {}
 
 export const ModeSwitch: React.FC<ModeSwitchProps> = ({ ...props }) => {
-  const [mode, setMode] = useAtom(settingsModeAtom);
+  const [mode, setMode] = useAtom(_SettingsMode);
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);

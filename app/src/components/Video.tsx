@@ -1,14 +1,8 @@
 import ReactPlayer from 'react-player';
 import { ForwardedRef, forwardRef, useCallback, useMemo } from 'react';
 
-import Box from '@mui/material/Box';
-
-const PREFIX = 'Video';
-const classes = {
-  player: `${PREFIX}-player`,
-  playerWrapper: `${PREFIX}-playerWrapper`,
-  stage: `${PREFIX}-stage`,
-};
+import { _PlayerDuration, _PlayerElapsed, _PlayerPlaying, _PlayerUrl } from '@/state';
+import { useAtom } from 'jotai';
 
 export const Video = forwardRef(
   (
@@ -17,32 +11,35 @@ export const Video = forwardRef(
       pause,
       pip,
       play,
-      playing,
+      // playing,
       setBuffering,
-      setDuration,
+      // setDuration,
       setPip,
-      setTime,
-      url,
-    }: {
+    }: // setTime,
+    {
       buffering: boolean;
-      duration: number;
       hideVideo: boolean;
       pause: () => void;
       pip: boolean;
       play: () => void;
-      playing: boolean;
+      // playing: boolean;
       seekTime: number;
       setBuffering: (b: boolean) => void;
-      setDuration: (d: number) => void;
+      // setDuration: (d: number) => void;
       setHideVideo: (h: boolean) => void;
       setPip: (p: boolean) => void;
       setSeekTime: (s: number) => void;
-      setTime: (t: number) => void;
+      // setTime: (t: number) => void;
       time: number;
-      url: string | null;
     },
     ref: ForwardedRef<ReactPlayer | null>,
   ): JSX.Element | null => {
+    // shared state
+    const [, setDuration] = useAtom(_PlayerDuration);
+    const [, setElapsed] = useAtom(_PlayerElapsed);
+    const [url, setUrl] = useAtom(_PlayerUrl);
+    const [playing] = useAtom(_PlayerPlaying);
+
     const config = useMemo(
       () => ({
         forceAudio: false,
@@ -62,13 +59,15 @@ export const Video = forwardRef(
     const onDisablePIP = useCallback(() => setPip(false), []);
     const onDuration = useCallback((duration: number) => setDuration(duration), []);
     const onEnablePIP = useCallback(() => setPip(true), []);
-    const onProgress = useCallback(({ playedSeconds }: { playedSeconds: number }) => setTime(playedSeconds), [setTime]);
+    const onProgress = useCallback(
+      ({ playedSeconds }: { playedSeconds: number }) => setElapsed(playedSeconds),
+      [setElapsed],
+    );
 
     if (!url) return null;
 
     return (
       <ReactPlayer
-        className={classes.player}
         config={config}
         height="100%"
         onBuffer={onBuffer}
