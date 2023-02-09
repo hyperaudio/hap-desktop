@@ -250,6 +250,7 @@ export const createMuiTheme = (payload: createMuiThemeProps) => {
             color: palette.text.primary,
           },
           thumb: {
+            display: 'none',
             '&:hover': {
               boxShadow: `0 0 0 8px ${palette.action.hover}`,
             },
@@ -257,7 +258,9 @@ export const createMuiTheme = (payload: createMuiThemeProps) => {
               boxShadow: 'none',
             },
           },
-          rail: {},
+          rail: {
+            opacity: 0.25,
+          },
         },
       },
       MuiStack: {
