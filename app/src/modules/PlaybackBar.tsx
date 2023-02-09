@@ -1,3 +1,7 @@
+import { useDraggable } from '@neodrag/react';
+import { useEffect, useRef } from 'react';
+
+import Card from '@mui/material/Card';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
@@ -21,6 +25,13 @@ const Root = styled(Toolbar)(({ theme }) => ({
 }));
 
 export const PlaybackBar: React.FC<PlaybackBarProps> = ({ ...props }) => {
+  const draggableRef = useRef(null);
+  const { isDragging, dragState } = useDraggable(draggableRef);
+
+  useEffect(() => {
+    console.log({ isDragging, dragState });
+  }, [isDragging, dragState]);
+
   return (
     <>
       <Root className={classes.root}>
@@ -44,6 +55,19 @@ export const PlaybackBar: React.FC<PlaybackBarProps> = ({ ...props }) => {
           </Grid>
         </Grid>
       </Root>
+      <Card
+        ref={draggableRef}
+        sx={theme => ({
+          bottom: theme.spacing(1),
+          p: 1,
+          position: 'fixed',
+          left: theme.spacing(2),
+          width: '33%',
+          zIndex: theme.zIndex.drawer,
+        })}
+      >
+        Draggable
+      </Card>
     </>
   );
 };

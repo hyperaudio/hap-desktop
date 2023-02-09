@@ -333,7 +333,7 @@ export const EditPage: React.FC = () => {
       <Card
         ref={draggableRef}
         sx={theme => ({
-          bottom: theme.spacing(10),
+          bottom: theme.spacing(1),
           p: 1,
           position: 'fixed',
           right: theme.spacing(2),
