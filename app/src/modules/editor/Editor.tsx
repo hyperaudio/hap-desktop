@@ -1,4 +1,5 @@
 import React, { useMemo, useCallback, useReducer, useState, useRef, useEffect, SyntheticEvent } from 'react';
+import { useAtom } from 'jotai';
 import {
   Editor as DraftEditor,
   EditorState,
@@ -25,11 +26,12 @@ import Popover from '@mui/material/Popover';
 import Popper from '@mui/material/Popper';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import { Theme } from '@mui/system';
 import { styled, useTheme } from '@mui/material/styles';
 
 import PlayheadDecorator from './PlayheadDecorator';
 import reducer from './reducer';
-import { Theme } from '@mui/system';
+import { _PlayerElapsed, _PlayerPlaying } from '@/state';
 
 const filter = createFilterOptions();
 
@@ -104,7 +106,6 @@ interface EditorProps {
   initialState: EditorState;
   playheadDecorator: typeof PlayheadDecorator | undefined | null;
   decorators?: CompositeDecorator[] | any[];
-  time: number;
   seekTo: (time: number) => void;
   showDialog?: boolean;
   aligner?: (
@@ -126,9 +127,6 @@ interface EditorProps {
     contentState: ContentState;
   }) => void;
   autoScroll?: boolean;
-  play: () => void;
-  playing: boolean;
-  pause: () => void;
   readOnly?: boolean;
 }
 
@@ -136,7 +134,6 @@ export const Editor = ({
   initialState = EditorState.createEmpty(),
   playheadDecorator = PlayheadDecorator,
   decorators = [],
-  time = 0,
   seekTo,
   showDialog,
   aligner = wordAligner,
@@ -144,13 +141,14 @@ export const Editor = ({
   setSpeakers,
   onChange: onChangeProp,
   autoScroll,
-  play,
-  playing,
-  pause,
   readOnly,
   ...rest
 }: EditorProps): JSX.Element => {
   const theme = useTheme();
+
+  // shared state
+  const [time] = useAtom(_PlayerElapsed);
+  const [playing, setPlaying] = useAtom(_PlayerPlaying);
 
   const [state, dispatch] = useReducer(reducer, initialState);
   // const [speakers, setSpeakers] = useState(
@@ -236,7 +234,7 @@ export const Editor = ({
           setCurrentBlock(block);
 
           setWasPlaying(playing);
-          pause && pause();
+          setPlaying(false);
 
           setSpeaker({ id: data.speaker, name: speakers?.[data.speaker]?.name });
           setSpeakerAnchor(target);
@@ -267,7 +265,7 @@ export const Editor = ({
         item?.start && seekTo && seekTo(item.start);
       }
     },
-    [seekTo, editorState, readOnly, playing, pause],
+    [seekTo, editorState, readOnly, playing],
   );
 
   // const handleMouseMove = useCallback(
@@ -293,7 +291,7 @@ export const Editor = ({
       event.preventDefault();
       event.stopPropagation();
       setSpeakerAnchor(null);
-      wasPlaying && play && play();
+      wasPlaying && setPlaying(true);
 
       if (typeof newValue === 'string') {
         // A: Create new by type-in and Enter press
@@ -339,7 +337,7 @@ export const Editor = ({
         });
       }
     },
-    [speakers, currentBlock, editorState, aligner, wasPlaying, play],
+    [speakers, currentBlock, editorState, aligner, wasPlaying],
   );
 
   const handleClickAway = useCallback(() => {
@@ -347,8 +345,8 @@ export const Editor = ({
     if (Boolean(speakerAnchor)) setSpeakerAnchor(null);
     setCurrentBlock(null);
 
-    if (wasPlaying) play();
-  }, [speakerAnchor, wasPlaying, play]);
+    if (wasPlaying) setPlaying(true);
+  }, [speakerAnchor, wasPlaying]);
 
   const handlePastedText = useCallback(
     (text: string) => {
