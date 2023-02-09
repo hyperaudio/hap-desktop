@@ -1,8 +1,8 @@
 import { useAtom } from 'jotai';
 import { useMemo, useState } from 'react';
 
+// import Forward10Icon from '@mui/icons-material/Forward10';
 import Box from '@mui/material/Box';
-import Forward10Icon from '@mui/icons-material/Forward10';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import PauseIcon from '@mui/icons-material/Pause';
@@ -26,19 +26,11 @@ const classes = {
 
 const Root = styled(Box)(({ theme }) => ({
   [`& .${classes.speedButton}`]: {
-    // color: theme.palette.text.secondary,
-    padding: theme.spacing(0.66, 0.66),
-    fontWeight: '600',
     fontSize: '0.77rem',
+    fontWeight: '600',
+    padding: theme.spacing(0.66, 0.66),
     span: {
       fontSize: '0.5rem',
-      marginRight: theme.spacing(0.33),
-    },
-  },
-  [`& .${classes.menuButton}`]: {
-    span: {
-      fontSize: '0.5rem',
-      display: 'inline-block',
       marginRight: theme.spacing(0.33),
     },
   },
@@ -52,26 +44,16 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({ ...props }) 
   // local state
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  const open = Boolean(anchorEl);
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const onForward = () => {
-    console.log('on rewind');
-  };
-  const onRewind = () => {
-    console.log('on rewind');
-  };
+  // const onForward = () => console.log('on rewind');
+  const onRewind = () => console.log('on rewind');
 
   const displayPlaybackRate = useMemo(() => {
     const round = Math.round(rate * 10) / 10;
     const parsed = round < 1 ? round.toString().slice(1, 3) : round;
     return parsed;
   }, [rate]);
+
+  const isRateMenuOpen = Boolean(anchorEl);
 
   return (
     <>
@@ -81,10 +63,10 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({ ...props }) 
             <IconButton
               size="small"
               className={classes.speedButton}
-              aria-controls={open ? 'basic-menu' : undefined}
+              aria-controls={isRateMenuOpen ? 'basic-menu' : undefined}
               aria-haspopup="true"
-              aria-expanded={open ? 'true' : undefined}
-              onClick={handleClick}
+              aria-expanded={isRateMenuOpen ? 'true' : undefined}
+              onClick={(e: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(e.currentTarget)}
               sx={theme => ({ minWidth: theme.typography.pxToRem(36) })}
             >
               <span>✕</span>
@@ -101,11 +83,11 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({ ...props }) 
               <Replay10Icon />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Fast-forward 10s">
+          {/* <Tooltip title="Fast-forward 10s">
             <IconButton size="small" onClick={onForward}>
               <Forward10Icon />
             </IconButton>
-          </Tooltip>
+          </Tooltip> */}
         </Stack>
       </Root>
       <Menu
@@ -113,8 +95,8 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({ ...props }) 
         anchorEl={anchorEl}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         id="basic-menu"
-        onClose={handleClose}
-        open={open}
+        onClose={() => setAnchorEl(null)}
+        open={isRateMenuOpen}
         slotProps={{ backdrop: { style: { opacity: 0 } } }}
         transformOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >

@@ -17,6 +17,7 @@ const classes = {
 const Root = styled(Toolbar)(({ theme }) => ({
   alignItems: 'center',
   height: '64px',
+  userSelect: 'none',
 }));
 
 export const PlaybackBar: React.FC<PlaybackBarProps> = ({ children, ...props }) => {
