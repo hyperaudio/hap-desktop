@@ -58,7 +58,7 @@ export const PlaybackBar: React.FC<PlaybackBarProps> = ({ ...props }) => {
       <Card
         ref={draggableRef}
         sx={theme => ({
-          bottom: theme.spacing(1),
+          bottom: theme.spacing(10),
           p: 1,
           position: 'fixed',
           left: theme.spacing(2),
