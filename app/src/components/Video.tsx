@@ -8,7 +8,7 @@ export const Video = forwardRef(({}: {}, ref: ForwardedRef<ReactPlayer | null>):
   // shared state
   const [, setDuration] = useAtom(_PlayerDuration);
   const [, setElapsed] = useAtom(_PlayerElapsed);
-  const [playing, setPlaying] = useAtom(_PlayerPlaying);
+  const [playing] = useAtom(_PlayerPlaying);
   const [rate] = useAtom(_PlayerRate);
   const [url] = useAtom(_PlayerUrl);
   const [volume] = useAtom(_PlayerVolume);
@@ -40,7 +40,6 @@ export const Video = forwardRef(({}: {}, ref: ForwardedRef<ReactPlayer | null>):
       config={config}
       height="100%"
       onDuration={onDuration}
-      onPlay={() => setPlaying(true)}
       onProgress={onProgress}
       playbackRate={rate}
       playing={playing}

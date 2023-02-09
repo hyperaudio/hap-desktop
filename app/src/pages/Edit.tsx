@@ -20,7 +20,7 @@ import { Editor, createEntityMap, PlaybackBar, TabBar } from '@/modules';
 import { ElectronUtils, FilesystemUtils } from '@/utils';
 import { Preloader, Video } from '@/components';
 import { Project } from '@/models';
-import { _PlayerUrl, _ProjectPath } from '@/state';
+import { _PlayerElapsed, _PlayerUrl, _ProjectPath } from '@/state';
 
 const PREFIX = 'EditorPage';
 const CONTROLS_HEIGHT = 60;
@@ -125,13 +125,14 @@ const Root = styled(Box, {
 }));
 
 export const EditPage: React.FC = () => {
-  const theme = useTheme();
-  const navigate = useNavigate();
-
   const draggableRef = useRef(null);
   const playerRef = useRef<ReactPlayer>() as MutableRefObject<ReactPlayer>;
 
+  const navigate = useNavigate();
+  const { isDragging, dragState } = useDraggable(draggableRef);
+
   // shared state
+  const [, setElapsed] = useAtom(_PlayerElapsed);
   const [filePath, setFilePath] = useAtom(_ProjectPath);
   const [url, setUrl] = useAtom(_PlayerUrl);
 
@@ -148,12 +149,6 @@ export const EditPage: React.FC = () => {
 
   const { blocks } = data ?? {};
 
-  const { isDragging, dragState } = useDraggable(draggableRef);
-
-  useEffect(() => {
-    console.log({ isDragging, dragState });
-  }, [isDragging, dragState]);
-
   const initialState = useMemo(
     () => blocks && EditorState.createWithContent(convertFromRaw({ blocks, entityMap: createEntityMap(blocks) })),
     [blocks],
@@ -167,6 +162,7 @@ export const EditPage: React.FC = () => {
 
   const seekTo = useCallback(
     (time: number): void => {
+      setElapsed(time);
       if (playerRef.current) playerRef.current.seekTo(time, 'seconds');
     },
     [playerRef],
@@ -255,7 +251,9 @@ export const EditPage: React.FC = () => {
     }
   }, [filePath]);
 
-  console.log({ draggableRef, isDragging, dragState });
+  useEffect(() => {
+    console.log({ isDragging, dragState });
+  }, [isDragging, dragState]);
 
   if (loading) return <Preloader title="Loading your project…" />;
   if (!initialState) return null;
@@ -329,26 +327,22 @@ export const EditPage: React.FC = () => {
             width: 'auto',
           })}
         >
-          <PlaybackBar />
+          <PlaybackBar></PlaybackBar>
         </AppBar>
       </Root>
-      {url && (
-        <Card
-          elevation={1}
-          sx={{
-            bottom: theme.spacing(10),
-            p: 1,
-            pointerEvents: 'initial',
-            position: 'fixed',
-            right: theme.spacing(2),
-            width: '33%',
-            zIndex: theme.zIndex.drawer,
-          }}
-          ref={draggableRef}
-        >
-          <Video ref={playerRef} />
-        </Card>
-      )}
+      <Card
+        ref={draggableRef}
+        sx={theme => ({
+          bottom: theme.spacing(10),
+          p: 1,
+          position: 'fixed',
+          right: theme.spacing(2),
+          width: '33%',
+          zIndex: theme.zIndex.drawer,
+        })}
+      >
+        {url && <Video ref={playerRef} />}
+      </Card>
     </>
   );
 };

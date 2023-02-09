@@ -20,7 +20,7 @@ const Root = styled(Toolbar)(({ theme }) => ({
   userSelect: 'none',
 }));
 
-export const PlaybackBar: React.FC<PlaybackBarProps> = ({ children, ...props }) => {
+export const PlaybackBar: React.FC<PlaybackBarProps> = ({ ...props }) => {
   return (
     <>
       <Root className={classes.root}>
@@ -44,7 +44,6 @@ export const PlaybackBar: React.FC<PlaybackBarProps> = ({ children, ...props }) 
           </Grid>
         </Grid>
       </Root>
-      {children}
     </>
   );
 };
