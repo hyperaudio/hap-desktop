@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useAtom } from 'jotai';
 
 import Box from '@mui/material/Box';
 import FeaturedVideoOutlinedIcon from '@mui/icons-material/FeaturedVideoOutlined';
@@ -13,6 +14,7 @@ import { BoxProps } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
 import { useSettingsDialog } from '@/modules';
+import { _PlayerVolume } from '@/state';
 
 interface PlaybackSettingsProps extends BoxProps {}
 
@@ -26,39 +28,48 @@ const Root = styled(Box)(({ theme }) => ({
 }));
 
 export const PlaybackSettings: React.FC<PlaybackSettingsProps> = ({ ...props }) => {
+  // shared state
+  const [volume, setVolume] = useAtom(_PlayerVolume);
   const [showSettings, settingsDialog] = useSettingsDialog();
 
-  const [value, setValue] = useState<number>(30);
+  // local state
   const [video, setVideo] = useState<boolean>(true);
 
   const onMute = useCallback(() => {
-    if (value > 0) setValue(0);
-    console.log('Mute');
-  }, [value]);
+    if (volume > 0) {
+      setVolume(0);
+    } else {
+      setVolume(1);
+    }
+  }, [volume]);
 
   const onPinVideo = useCallback(() => {
     setVideo(!video);
   }, [video]);
 
-  const handleChange = (event: Event, newValue: number | number[]) => {
-    setValue(newValue as number);
+  const handleVolumeSlider = (event: Event, newValue: number | number[]) => {
+    setVolume(newValue as number);
   };
+
   return (
     <>
       <Root className={classes.root}>
         <Stack spacing={4} direction="row" alignItems="center">
           <Stack direction="row" alignItems="center" justifyContent="space-between">
-            <Tooltip title={value === 0 ? 'Unmute' : 'Mute'}>
+            <Tooltip title={volume === 0 ? 'Unmute' : 'Mute'}>
               <IconButton size="small" onClick={onMute}>
-                {value > 0 ? <VolumeDown /> : <VolumeOffIcon />}
+                {volume > 0 ? <VolumeDown /> : <VolumeOffIcon />}
               </IconButton>
             </Tooltip>
             <Slider
               aria-label="Volume"
-              onChange={handleChange}
+              max={1}
+              min={0}
+              onChange={handleVolumeSlider}
               size="small"
               sx={{ minWidth: '64px' }}
-              value={value}
+              value={volume}
+              step={0.01}
               valueLabelDisplay="auto"
             />
           </Stack>

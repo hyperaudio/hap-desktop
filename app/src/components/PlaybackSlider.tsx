@@ -1,12 +1,13 @@
-import { useMemo, useState } from 'react';
+import { useAtom } from 'jotai';
+import { useMemo } from 'react';
 
-import Slider from '@mui/material/Slider';
 import Box from '@mui/material/Box';
+import Slider from '@mui/material/Slider';
 import { BoxProps, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
+
 import { formatTime } from '@/utils';
 import { _PlayerDuration, _PlayerElapsed } from '@/state';
-import { useAtom } from 'jotai';
 
 interface PlaybackSliderProps extends BoxProps {}
 
@@ -59,7 +60,7 @@ export const PlaybackSlider: React.FC<PlaybackSliderProps> = ({ ...props }) => {
       />
       <Box className={classes.timespan}>
         <Typography>{displayElapsed}</Typography>
-        <Typography>{displayRemaining}</Typography>
+        <Typography>-{displayRemaining}</Typography>
       </Box>
     </Root>
   );

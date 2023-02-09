@@ -13,7 +13,7 @@ import Tooltip from '@mui/material/Tooltip';
 import { BoxProps, Slider } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
-import { _PlayerPlaying } from '@/state';
+import { _PlayerPlaying, _PlayerRate } from '@/state';
 
 interface PlaybackControlsProps extends BoxProps {}
 
@@ -47,10 +47,10 @@ const Root = styled(Box)(({ theme }) => ({
 export const PlaybackControls: React.FC<PlaybackControlsProps> = ({ ...props }) => {
   //shared state
   const [playing, setPlaying] = useAtom(_PlayerPlaying);
+  const [rate, setRate] = useAtom(_PlayerRate);
 
   // local state
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [rate, setRate] = useState<number>(1);
 
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
