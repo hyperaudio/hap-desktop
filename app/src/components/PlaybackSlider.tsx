@@ -1,13 +1,14 @@
 import { useAtom } from 'jotai';
-import { useMemo } from 'react';
+import { useContext, useCallback, useMemo } from 'react';
 
 import Box from '@mui/material/Box';
 import Slider from '@mui/material/Slider';
 import { BoxProps, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
-import { formatTime } from '@/utils';
+import { PlayerRefContext } from '@/views';
 import { _PlayerDuration, _PlayerElapsed } from '@/state';
+import { formatTime } from '@/utils';
 
 interface PlaybackSliderProps extends BoxProps {}
 
@@ -40,11 +41,23 @@ const Root = styled(Box)(({ theme }) => ({
 }));
 
 export const PlaybackSlider: React.FC<PlaybackSliderProps> = ({ ...props }) => {
+  const PlayerRef = useContext(PlayerRefContext);
+
+  // shared state
   const [elapsed, setElapsed] = useAtom(_PlayerElapsed);
   const [duration] = useAtom(_PlayerDuration);
 
   const displayElapsed = useMemo(() => formatTime(elapsed), [elapsed]);
   const displayRemaining = useMemo(() => formatTime(duration - elapsed), [duration, elapsed]);
+
+  const seekTo = useCallback(
+    (time: number) => {
+      if (!PlayerRef) return;
+      setElapsed(time);
+      PlayerRef.current.seekTo(time, 'seconds');
+    },
+    [PlayerRef],
+  );
 
   return (
     <Root className={classes.root}>
@@ -52,10 +65,9 @@ export const PlaybackSlider: React.FC<PlaybackSliderProps> = ({ ...props }) => {
         aria-label="Playhead"
         max={duration}
         min={0}
-        onChange={(e, v) => setElapsed(v as number)}
+        onChange={(e, v) => seekTo(v as number)}
         size="small"
         value={elapsed}
-        valueLabelDisplay="auto"
         valueLabelFormat={v => formatTime(v)}
       />
       <Box className={classes.timespan}>

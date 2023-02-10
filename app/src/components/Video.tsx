@@ -1,10 +1,13 @@
 import ReactPlayer from 'react-player';
-import { ForwardedRef, forwardRef, useCallback, useMemo } from 'react';
+import { useContext, ForwardedRef, forwardRef, useCallback, useMemo } from 'react';
 import { useAtom } from 'jotai';
 
 import { _PlayerDuration, _PlayerElapsed, _PlayerPlaying, _PlayerRate, _PlayerUrl, _PlayerVolume } from '@/state';
+import { PlayerRefContext } from '@/views';
 
 export const Video = forwardRef(({}: {}, ref: ForwardedRef<ReactPlayer | null>): JSX.Element | null => {
+  const PlayerRef = useContext(PlayerRefContext);
+
   // shared state
   const [, setDuration] = useAtom(_PlayerDuration);
   const [, setElapsed] = useAtom(_PlayerElapsed);
@@ -39,12 +42,13 @@ export const Video = forwardRef(({}: {}, ref: ForwardedRef<ReactPlayer | null>):
     <ReactPlayer
       config={config}
       height="100%"
+      id="VideoPlayerRef" // if you want to change this, change it thrughout the app
       onDuration={onDuration}
       onProgress={onProgress}
       playbackRate={rate}
       playing={playing}
       progressInterval={100}
-      ref={ref}
+      ref={PlayerRef}
       style={{ lineHeight: 0 }}
       url={url}
       volume={volume}

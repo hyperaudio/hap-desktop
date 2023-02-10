@@ -1,15 +1,23 @@
-import React, { useMemo, useCallback, useReducer, useState, useRef, useEffect, SyntheticEvent } from 'react';
+import React, {
+  SyntheticEvent,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from 'react';
 import { useAtom } from 'jotai';
 import {
+  CompositeDecorator,
+  ContentBlock,
+  ContentState,
   Editor as DraftEditor,
   EditorState,
-  ContentState,
   Modifier,
-  CompositeDecorator,
-  convertToRaw,
-  DraftBlockType,
-  ContentBlock,
   RawDraftContentBlock,
+  convertToRaw,
 } from 'draft-js';
 import TC, { FRAMERATE } from 'smpte-timecode';
 // import { alignSTTwithPadding } from '@bbc/stt-align-node';
@@ -32,6 +40,7 @@ import { styled, useTheme } from '@mui/material/styles';
 import PlayheadDecorator from './PlayheadDecorator';
 import reducer from './reducer';
 import { _PlayerElapsed, _PlayerPlaying } from '@/state';
+import { PlayerRefContext } from '@/views';
 
 const filter = createFilterOptions();
 
@@ -106,7 +115,6 @@ interface EditorProps {
   initialState: EditorState;
   playheadDecorator: typeof PlayheadDecorator | undefined | null;
   decorators?: CompositeDecorator[] | any[];
-  seekTo: (time: number) => void;
   showDialog?: boolean;
   aligner?: (
     words: { [key: string]: any }[],
@@ -134,7 +142,6 @@ export const Editor = ({
   initialState = EditorState.createEmpty(),
   playheadDecorator = PlayheadDecorator,
   decorators = [],
-  seekTo,
   showDialog,
   aligner = wordAligner,
   speakers,
@@ -145,9 +152,10 @@ export const Editor = ({
   ...rest
 }: EditorProps): JSX.Element => {
   const theme = useTheme();
+  const PlayerRef = useContext(PlayerRefContext);
 
   // shared state
-  const [time] = useAtom(_PlayerElapsed);
+  const [time, setTime] = useAtom(_PlayerElapsed);
   const [playing, setPlaying] = useAtom(_PlayerPlaying);
 
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -203,6 +211,15 @@ export const Editor = ({
           })
         : state,
     [state, time, playheadDecorator, decorators, focused],
+  );
+
+  const seekTo = useCallback(
+    (time: number) => {
+      if (!PlayerRef) return;
+      setTime(time);
+      PlayerRef.current.seekTo(time, 'seconds');
+    },
+    [PlayerRef],
   );
 
   const handleClick = useCallback(
@@ -394,7 +411,7 @@ export const Editor = ({
     // see https://bugs.chromium.org/p/chromium/issues/detail?id=833617&q=scrollintoview&can=2
     if (readOnly && engine === 'Blink') {
       playhead?.scrollIntoView();
-    } else playhead?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else playhead?.scrollIntoView({ block: 'start' });
   }, [autoScroll, wrapper, time, focused, speakerAnchor, readOnly, editorState, engine]);
 
   return (

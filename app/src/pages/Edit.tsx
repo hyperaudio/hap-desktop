@@ -9,16 +9,15 @@ import { v4 as uuidv4 } from 'uuid';
 
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Toolbar from '@mui/material/Toolbar';
 import { BoxProps } from '@mui/material';
-import { styled, useTheme } from '@mui/material/styles';
+import { styled } from '@mui/material/styles';
 
 import { Editor, createEntityMap, PlaybackBar, TabBar } from '@/modules';
 import { ElectronUtils, FilesystemUtils } from '@/utils';
-import { Preloader, Video } from '@/components';
+import { Preloader } from '@/components';
 import { Project } from '@/models';
 import { _PlayerElapsed, _PlayerUrl, _ProjectPath } from '@/state';
 
@@ -160,14 +159,6 @@ export const EditPage: React.FC = () => {
     contentState: ContentState;
   }>();
 
-  const seekTo = useCallback(
-    (time: number): void => {
-      setElapsed(time);
-      if (playerRef.current) playerRef.current.seekTo(time, 'seconds');
-    },
-    [playerRef],
-  );
-
   const handleOpen = useCallback(async (path: string) => {
     try {
       if (!path) return;
@@ -284,7 +275,7 @@ export const EditPage: React.FC = () => {
             overflow: 'auto',
             position: 'fixed',
             right: 0,
-            scrollBehavior: 'smooth',
+            // scrollBehavior: 'smooth',
             top: '48px',
           }}
         >
@@ -296,7 +287,7 @@ export const EditPage: React.FC = () => {
                 <Container ref={div} fixed maxWidth="sm">
                   {initialState ? (
                     <Editor
-                      {...{ initialState, seekTo, speakers, setSpeakers }}
+                      {...{ initialState, speakers, setSpeakers }}
                       autoScroll
                       onChange={setDraft}
                       playheadDecorator={noKaraoke ? null : undefined}
@@ -327,22 +318,9 @@ export const EditPage: React.FC = () => {
             width: 'auto',
           })}
         >
-          <PlaybackBar></PlaybackBar>
+          <PlaybackBar />
         </AppBar>
       </Root>
-      <Card
-        ref={draggableRef}
-        sx={theme => ({
-          bottom: theme.spacing(10),
-          p: 1,
-          position: 'fixed',
-          right: theme.spacing(2),
-          width: '33%',
-          zIndex: theme.zIndex.drawer,
-        })}
-      >
-        {url && <Video ref={playerRef} />}
-      </Card>
     </>
   );
 };

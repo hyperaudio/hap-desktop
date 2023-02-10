@@ -1,4 +1,5 @@
 import { useDraggable } from '@neodrag/react';
+import { useAtom } from 'jotai';
 import { useEffect, useRef } from 'react';
 
 import Card from '@mui/material/Card';
@@ -9,7 +10,8 @@ import Toolbar from '@mui/material/Toolbar';
 import { ToolbarProps } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
-import { PlaybackControls, PlaybackSlider, PlaybackSettings } from '@/components';
+import { PlaybackControls, PlaybackSlider, PlaybackSettings, Video } from '@/components';
+import { _PlayerUrl } from '@/state';
 
 interface PlaybackBarProps extends ToolbarProps {}
 
@@ -27,6 +29,9 @@ const Root = styled(Toolbar)(({ theme }) => ({
 export const PlaybackBar: React.FC<PlaybackBarProps> = ({ ...props }) => {
   const draggableRef = useRef(null);
   const { isDragging, dragState } = useDraggable(draggableRef);
+
+  // shared state
+  const [url] = useAtom(_PlayerUrl);
 
   useEffect(() => {
     console.log({ isDragging, dragState });
@@ -55,19 +60,21 @@ export const PlaybackBar: React.FC<PlaybackBarProps> = ({ ...props }) => {
           </Grid>
         </Grid>
       </Root>
-      <Card
-        ref={draggableRef}
-        sx={theme => ({
-          bottom: theme.spacing(10),
-          p: 1,
-          position: 'fixed',
-          left: theme.spacing(2),
-          width: '33%',
-          zIndex: theme.zIndex.drawer,
-        })}
-      >
-        Draggable
-      </Card>
+      {url && (
+        <Card
+          ref={draggableRef}
+          sx={theme => ({
+            bottom: theme.spacing(10),
+            p: 1,
+            position: 'fixed',
+            right: theme.spacing(2),
+            width: '33%',
+            zIndex: theme.zIndex.drawer,
+          })}
+        >
+          <Video />
+        </Card>
+      )}
     </>
   );
 };
