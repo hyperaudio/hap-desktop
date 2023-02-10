@@ -1,5 +1,5 @@
 import { useAtom } from 'jotai';
-import { useMemo, useState } from 'react';
+import { useCallback, useContext, useMemo, useState } from 'react';
 
 // import Forward10Icon from '@mui/icons-material/Forward10';
 import Box from '@mui/material/Box';
@@ -13,7 +13,8 @@ import Tooltip from '@mui/material/Tooltip';
 import { BoxProps, Slider } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
-import { _PlayerPlaying, _PlayerRate } from '@/state';
+import { _PlayerElapsed, _PlayerPlaying, _PlayerRate } from '@/state';
+import { PlayerRefContext } from '@/views';
 
 interface PlaybackControlsProps extends BoxProps {}
 
@@ -37,15 +38,22 @@ const Root = styled(Box)(({ theme }) => ({
 }));
 
 export const PlaybackControls: React.FC<PlaybackControlsProps> = ({ ...props }) => {
+  const PlayerRef = useContext(PlayerRefContext);
+
   //shared state
+  const [elapsed, setElapsed] = useAtom(_PlayerElapsed);
   const [playing, setPlaying] = useAtom(_PlayerPlaying);
   const [rate, setRate] = useAtom(_PlayerRate);
 
   // local state
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  // const onForward = () => console.log('on rewind');
-  const onRewind = () => console.log('on rewind');
+  const onRewind = useCallback(() => {
+    let t = elapsed > 10 ? elapsed - 10 : 0;
+    if (!PlayerRef) return;
+    setElapsed(t);
+    PlayerRef.current.seekTo(t, 'seconds');
+  }, [PlayerRef, elapsed]);
 
   const displayPlaybackRate = useMemo(() => {
     const round = Math.round(rate * 10) / 10;
@@ -83,11 +91,6 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({ ...props }) 
               <Replay10Icon />
             </IconButton>
           </Tooltip>
-          {/* <Tooltip title="Fast-forward 10s">
-            <IconButton size="small" onClick={onForward}>
-              <Forward10Icon />
-            </IconButton>
-          </Tooltip> */}
         </Stack>
       </Root>
       <Menu
@@ -116,7 +119,6 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({ ...props }) 
               lineHeight: '0',
             }}
             value={rate}
-            valueLabelDisplay="auto"
             valueLabelFormat={v => v}
           />
         </Box>
