@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useRef, useCallback, useEffect, MutableRefObject } from 'react';
-import ReactPlayer from 'react-player';
 import { EditorState, ContentState, RawDraftContentBlock, convertFromRaw } from 'draft-js';
 import { ipcRenderer } from 'electron';
 import { useAtom } from 'jotai';
@@ -124,16 +123,11 @@ const Root = styled(Box, {
 }));
 
 export const EditPage: React.FC = () => {
-  const draggableRef = useRef(null);
-  const playerRef = useRef<ReactPlayer>() as MutableRefObject<ReactPlayer>;
-
   const navigate = useNavigate();
-  const { isDragging, dragState } = useDraggable(draggableRef);
 
   // shared state
-  const [, setElapsed] = useAtom(_PlayerElapsed);
   const [filePath, setFilePath] = useAtom(_ProjectPath);
-  const [url, setUrl] = useAtom(_PlayerUrl);
+  const [, setUrl] = useAtom(_PlayerUrl);
 
   // local state
   const [error, setError] = useState<Error>();
@@ -242,10 +236,6 @@ export const EditPage: React.FC = () => {
     }
   }, [filePath]);
 
-  useEffect(() => {
-    console.log({ isDragging, dragState });
-  }, [isDragging, dragState]);
-
   if (loading) return <Preloader title="Loading your project…" />;
   if (!initialState) return null;
 
@@ -269,13 +259,13 @@ export const EditPage: React.FC = () => {
           <TabBar />
         </AppBar>
         <Box
+          id="ResizableBounds"
           sx={{
             bottom: '64px',
             left: 0,
             overflow: 'auto',
             position: 'fixed',
             right: 0,
-            // scrollBehavior: 'smooth',
             top: '48px',
           }}
         >
