@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 
 import Card from '@mui/material/Card';
 import Container from '@mui/material/Container';
+import Fade from '@mui/material/Fade';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Toolbar from '@mui/material/Toolbar';
@@ -11,7 +12,7 @@ import { ToolbarProps } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
 import { PlaybackControls, PlaybackSlider, PlaybackSettings, Video } from '@/components';
-import { _PlayerUrl } from '@/state';
+import { _PlayerUrl, _PlayerPin } from '@/state';
 
 interface PlaybackBarProps extends ToolbarProps {}
 
@@ -32,6 +33,7 @@ export const PlaybackBar: React.FC<PlaybackBarProps> = ({ ...props }) => {
 
   // shared state
   const [url] = useAtom(_PlayerUrl);
+  const [pin] = useAtom(_PlayerPin);
 
   useEffect(() => {
     console.log({ isDragging, dragState });
@@ -61,19 +63,21 @@ export const PlaybackBar: React.FC<PlaybackBarProps> = ({ ...props }) => {
         </Grid>
       </Root>
       {url && (
-        <Card
-          ref={draggableRef}
-          sx={theme => ({
-            bottom: theme.spacing(10),
-            p: 1,
-            position: 'fixed',
-            right: theme.spacing(2),
-            width: '33%',
-            zIndex: theme.zIndex.drawer,
-          })}
-        >
-          <Video />
-        </Card>
+        <Fade in={pin}>
+          <Card
+            ref={draggableRef}
+            sx={theme => ({
+              bottom: theme.spacing(10),
+              p: 1,
+              position: 'fixed',
+              right: theme.spacing(2),
+              width: '33%',
+              zIndex: theme.zIndex.drawer,
+            })}
+          >
+            <Video />
+          </Card>
+        </Fade>
       )}
     </>
   );

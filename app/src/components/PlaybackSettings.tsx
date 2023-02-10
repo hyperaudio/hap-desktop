@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { useAtom } from 'jotai';
 
 import Box from '@mui/material/Box';
@@ -14,7 +14,7 @@ import { BoxProps } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
 import { useSettingsDialog } from '@/modules';
-import { _PlayerVolume } from '@/state';
+import { _PlayerPin, _PlayerVolume } from '@/state';
 
 interface PlaybackSettingsProps extends BoxProps {}
 
@@ -29,27 +29,13 @@ const Root = styled(Box)(({ theme }) => ({
 
 export const PlaybackSettings: React.FC<PlaybackSettingsProps> = ({ ...props }) => {
   // shared state
-  const [volume, setVolume] = useAtom(_PlayerVolume);
+  const [pin, setPin] = useAtom(_PlayerPin);
   const [showSettings, settingsDialog] = useSettingsDialog();
+  const [volume, setVolume] = useAtom(_PlayerVolume);
 
-  // local state
-  const [video, setVideo] = useState<boolean>(true);
-
-  const onMute = useCallback(() => {
-    if (volume > 0) {
-      setVolume(0);
-    } else {
-      setVolume(1);
-    }
-  }, [volume]);
-
-  const onPinVideo = useCallback(() => {
-    setVideo(!video);
-  }, [video]);
-
-  const handleVolumeSlider = (event: Event, newValue: number | number[]) => {
-    setVolume(newValue as number);
-  };
+  const onChangeVolume = (v: number) => setVolume(v);
+  const onMute = useCallback(() => setVolume(volume > 0 ? 0 : 1), [volume]);
+  const onPinVideo = useCallback(() => setPin(!pin), [pin]);
 
   return (
     <>
@@ -65,12 +51,11 @@ export const PlaybackSettings: React.FC<PlaybackSettingsProps> = ({ ...props }) 
               aria-label="Volume"
               max={1}
               min={0}
-              onChange={handleVolumeSlider}
+              onChange={(e, v) => onChangeVolume(v as number)}
               size="small"
+              step={0.01}
               sx={{ minWidth: '64px' }}
               value={volume}
-              step={0.01}
-              valueLabelDisplay="auto"
             />
           </Stack>
           <Stack direction="row" alignItems="center">
@@ -78,7 +63,7 @@ export const PlaybackSettings: React.FC<PlaybackSettingsProps> = ({ ...props }) 
               <IconButton
                 size="small"
                 onClick={onPinVideo}
-                sx={theme => ({ color: video ? theme.palette.text.primary : theme.palette.text.secondary })}
+                sx={theme => ({ color: pin ? theme.palette.text.primary : theme.palette.text.secondary })}
               >
                 <FeaturedVideoOutlinedIcon />
               </IconButton>
