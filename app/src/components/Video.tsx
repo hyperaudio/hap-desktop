@@ -1,5 +1,5 @@
 import ReactPlayer from 'react-player';
-import { useContext, ForwardedRef, forwardRef, useCallback, useMemo } from 'react';
+import { useContext, ForwardedRef, forwardRef, useCallback, useEffect, useMemo } from 'react';
 import { useAtom } from 'jotai';
 
 import { _PlayerDuration, _PlayerElapsed, _PlayerPlaying, _PlayerRate, _PlayerUrl, _PlayerVolume } from '@/state';
@@ -10,7 +10,7 @@ export const Video = forwardRef(({}: {}, ref: ForwardedRef<ReactPlayer | null>):
 
   // shared state
   const [, setDuration] = useAtom(_PlayerDuration);
-  const [, setElapsed] = useAtom(_PlayerElapsed);
+  const [elapsed, setElapsed] = useAtom(_PlayerElapsed);
   const [playing] = useAtom(_PlayerPlaying);
   const [rate] = useAtom(_PlayerRate);
   const [url] = useAtom(_PlayerUrl);
@@ -35,6 +35,13 @@ export const Video = forwardRef(({}: {}, ref: ForwardedRef<ReactPlayer | null>):
     ({ playedSeconds }: { playedSeconds: number }) => setElapsed(playedSeconds),
     [setElapsed],
   );
+
+  useEffect(() => {
+    const play = () => {
+      if (playing) PlayerRef?.current.seekTo(elapsed, 'seconds');
+    };
+    play();
+  }, [playing]);
 
   if (!url) return null;
 

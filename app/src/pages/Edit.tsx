@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useCallback, useEffect, MutableRefObject } from 'react';
+import React, { useContext, useState, useMemo, useRef, useCallback, useEffect, MutableRefObject } from 'react';
 import { EditorState, ContentState, RawDraftContentBlock, convertFromRaw } from 'draft-js';
 import { ipcRenderer } from 'electron';
 import { useAtom } from 'jotai';
@@ -14,6 +14,7 @@ import Toolbar from '@mui/material/Toolbar';
 import { BoxProps } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
+import { DraggableBoundsRefContext } from '@/views';
 import { Editor, createEntityMap, PlaybackBar, TabBar } from '@/modules';
 import { ElectronUtils, FilesystemUtils } from '@/utils';
 import { Preloader } from '@/components';
@@ -124,6 +125,7 @@ const Root = styled(Box, {
 
 export const EditPage: React.FC = () => {
   const navigate = useNavigate();
+  const DraggableBoundsRef = useContext(DraggableBoundsRefContext);
 
   // shared state
   const [filePath, setFilePath] = useAtom(_ProjectPath);
@@ -247,7 +249,7 @@ export const EditPage: React.FC = () => {
           elevation={0}
           position="fixed"
           sx={theme => ({
-            bgcolor: 'background.paper',
+            bgcolor: 'background.default',
             borderBottom: `1px solid ${theme.palette.divider}`,
             bottom: 'auto',
             left: 0,
@@ -259,7 +261,7 @@ export const EditPage: React.FC = () => {
           <TabBar />
         </AppBar>
         <Box
-          id="ResizableBounds"
+          ref={DraggableBoundsRef}
           sx={{
             bottom: '64px',
             left: 0,
@@ -299,7 +301,7 @@ export const EditPage: React.FC = () => {
           elevation={0}
           position="fixed"
           sx={theme => ({
-            bgcolor: 'background.paper',
+            bgcolor: 'background.default',
             borderTop: `1px solid ${theme.palette.divider}`,
             bottom: 0,
             left: 0,

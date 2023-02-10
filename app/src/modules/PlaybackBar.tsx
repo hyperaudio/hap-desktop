@@ -1,7 +1,8 @@
 import { useDraggable } from '@neodrag/react';
 import { useAtom } from 'jotai';
-import { useEffect, useRef } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 
+import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Container from '@mui/material/Container';
 import Fade from '@mui/material/Fade';
@@ -11,6 +12,7 @@ import Toolbar from '@mui/material/Toolbar';
 import { ToolbarProps } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
+import { DraggableBoundsRefContext } from '@/views';
 import { PlaybackControls, PlaybackSlider, PlaybackSettings, Video } from '@/components';
 import { _PlayerUrl, _PlayerPin } from '@/state';
 
@@ -28,20 +30,40 @@ const Root = styled(Toolbar)(({ theme }) => ({
 }));
 
 export const PlaybackBar: React.FC<PlaybackBarProps> = ({ ...props }) => {
-  const draggableRef = useRef(null);
-  const { isDragging, dragState } = useDraggable(draggableRef);
+  const DraggableBoundsRef = useContext(DraggableBoundsRefContext);
+  const DraggableRef = useRef(null);
+
+  const { isDragging, dragState } = useDraggable(DraggableRef, {
+    bounds: DraggableBoundsRef?.current,
+    // disabled: true // TODO: remember this when implementing resize
+  });
 
   // shared state
   const [url] = useAtom(_PlayerUrl);
   const [pin] = useAtom(_PlayerPin);
 
-  useEffect(() => {
-    console.log({ isDragging, dragState });
-  }, [isDragging, dragState]);
+  // local state
+  const [showPlayer, setShowPlayer] = useState<boolean>();
+
+  const onMouseEnter = () => {
+    if (pin) return;
+    setShowPlayer(true);
+  };
+
+  const onMouseLeave = () => {
+    if (pin) return;
+    setShowPlayer(false);
+  };
+
+  // useEffect(() => {
+  //   console.log({ isDragging, dragState });
+  // }, [isDragging, dragState]);
+
+  useEffect(() => setShowPlayer(pin), [pin]);
 
   return (
     <>
-      <Root className={classes.root}>
+      <Root className={classes.root} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
         <Grid container alignItems="center">
           <Grid item xs={3}>
             <Stack direction="row" justifyContent="center">
@@ -63,19 +85,23 @@ export const PlaybackBar: React.FC<PlaybackBarProps> = ({ ...props }) => {
         </Grid>
       </Root>
       {url && (
-        <Fade in={pin}>
+        <Fade in={showPlayer}>
           <Card
-            ref={draggableRef}
+            elevation={2}
+            ref={DraggableRef}
             sx={theme => ({
               bottom: theme.spacing(10),
-              p: 1,
+              opacity: pin ? 1 : showPlayer ? 1 : 0.66,
+              p: 0.5,
               position: 'fixed',
               right: theme.spacing(2),
               width: '33%',
               zIndex: theme.zIndex.drawer,
             })}
           >
-            <Video />
+            <Box sx={theme => ({ borderRadius: theme.shape.borderRadius * 0.25, overflow: 'hidden' })}>
+              <Video />
+            </Box>
           </Card>
         </Fade>
       )}

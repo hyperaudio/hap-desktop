@@ -26,8 +26,8 @@ export const createMuiTheme = (payload: createMuiThemeProps) => {
   const palette: Palette = {
     ...p,
     background: {
-      paper: isDark ? '#212325' : 'white',
-      default: isDark ? '#11161d' : 'white',
+      paper: isDark ? '#151718' : 'white',
+      default: isDark ? '#212325' : 'white',
     },
     primary: {
       ...p.primary,
@@ -171,8 +171,7 @@ export const createMuiTheme = (payload: createMuiThemeProps) => {
           }
           body: {
             color: ${palette.text.primary};
-            background-color: transparent;
-            radial-gradient(circle, rgba(15,15,66,1) 20%, rgba(0,212,255,1) 100%);
+            background-color: ${palette.background.default};
             background: radial-gradient(ellipse at top, ${palette.background.default}, transparent),
             radial-gradient(ellipse at bottom, ${palette.background.paper}, transparent);
           }
