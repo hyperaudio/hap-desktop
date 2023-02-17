@@ -1,17 +1,20 @@
-import { useState } from 'react';
+import { useAtom } from 'jotai';
+import { useCallback, useContext, useMemo, useState } from 'react';
 
+// import Forward10Icon from '@mui/icons-material/Forward10';
 import Box from '@mui/material/Box';
-import Forward10Icon from '@mui/icons-material/Forward10';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
 import PauseIcon from '@mui/icons-material/Pause';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import Replay10Icon from '@mui/icons-material/Replay10';
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
-import { BoxProps } from '@mui/material';
+import { BoxProps, Slider } from '@mui/material';
 import { styled } from '@mui/material/styles';
+
+import { _PlayerElapsed, _PlayerPlaying, _PlayerRate } from '@/state';
+import { PlayerRefContext } from '@/views';
 
 interface PlaybackControlsProps extends BoxProps {}
 
@@ -24,42 +27,41 @@ const classes = {
 
 const Root = styled(Box)(({ theme }) => ({
   [`& .${classes.speedButton}`]: {
-    // color: theme.palette.text.secondary,
-    padding: theme.spacing(0.66, 0.66),
-    fontWeight: '600',
     fontSize: '0.77rem',
+    fontWeight: '600',
+    padding: theme.spacing(0.66, 0.66),
     span: {
       fontSize: '0.5rem',
-      marginRight: theme.spacing(0.33),
-    },
-  },
-  [`& .${classes.menuButton}`]: {
-    span: {
-      fontSize: '0.5rem',
-      display: 'inline-block',
       marginRight: theme.spacing(0.33),
     },
   },
 }));
 
 export const PlaybackControls: React.FC<PlaybackControlsProps> = ({ ...props }) => {
+  const PlayerRef = useContext(PlayerRefContext);
+
+  //shared state
+  const [elapsed, setElapsed] = useAtom(_PlayerElapsed);
+  const [playing, setPlaying] = useAtom(_PlayerPlaying);
+  const [rate, setRate] = useAtom(_PlayerRate);
+
+  // local state
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [playing, setPlaying] = useState<boolean>();
 
-  const open = Boolean(anchorEl);
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  const onRewind = useCallback(() => {
+    let t = elapsed > 10 ? elapsed - 10 : 0;
+    if (!PlayerRef) return;
+    setElapsed(t);
+    PlayerRef.current.seekTo(t, 'seconds');
+  }, [PlayerRef, elapsed]);
 
-  const onForward = () => {
-    console.log('on rewind');
-  };
-  const onRewind = () => {
-    console.log('on rewind');
-  };
+  const displayPlaybackRate = useMemo(() => {
+    const round = Math.round(rate * 10) / 10;
+    const parsed = round < 1 ? round.toString().slice(1, 3) : round;
+    return parsed;
+  }, [rate]);
+
+  const isRateMenuOpen = Boolean(anchorEl);
 
   return (
     <>
@@ -69,12 +71,14 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({ ...props }) 
             <IconButton
               size="small"
               className={classes.speedButton}
-              aria-controls={open ? 'basic-menu' : undefined}
+              aria-controls={isRateMenuOpen ? 'basic-menu' : undefined}
               aria-haspopup="true"
-              aria-expanded={open ? 'true' : undefined}
-              onClick={handleClick}
+              aria-expanded={isRateMenuOpen ? 'true' : undefined}
+              onClick={(e: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(e.currentTarget)}
+              sx={theme => ({ minWidth: theme.typography.pxToRem(36) })}
             >
-              <span>✕</span>1
+              <span>✕</span>
+              {displayPlaybackRate}
             </IconButton>
           </Tooltip>
           <Tooltip title={playing ? 'Pause' : 'Play'}>
@@ -87,53 +91,37 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({ ...props }) 
               <Replay10Icon />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Fast-forward 10s">
-            <IconButton size="small" onClick={onForward}>
-              <Forward10Icon />
-            </IconButton>
-          </Tooltip>
         </Stack>
       </Root>
       <Menu
-        id="basic-menu"
+        MenuListProps={{ 'aria-label': 'Playback speed menu', dense: true }}
         anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
-        MenuListProps={{
-          'aria-label': 'Playback speed menu',
-          dense: true,
-        }}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        id="basic-menu"
+        onClose={() => setAnchorEl(null)}
+        open={isRateMenuOpen}
+        slotProps={{ backdrop: { style: { opacity: 0 } } }}
+        transformOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <MenuItem onClick={handleClose}>
-          <Box component="span" sx={{ fontSize: '0.5rem', mr: 1 }}>
-            ✕
-          </Box>{' '}
-          0.5
-        </MenuItem>
-        <MenuItem onClick={handleClose}>
-          <Box component="span" sx={{ fontSize: '0.5rem', mr: 1 }}>
-            ✕
-          </Box>{' '}
-          0.75
-        </MenuItem>
-        <MenuItem onClick={handleClose}>
-          <Box component="span" sx={{ fontSize: '0.5rem', mr: 1 }}>
-            ✕
-          </Box>{' '}
-          1
-        </MenuItem>
-        <MenuItem onClick={handleClose}>
-          <Box component="span" sx={{ fontSize: '0.5rem', mr: 1 }}>
-            ✕
-          </Box>{' '}
-          1.25
-        </MenuItem>
-        <MenuItem onClick={handleClose}>
-          <Box component="span" sx={{ fontSize: '0.5rem', mr: 1 }}>
-            ✕
-          </Box>{' '}
-          1.5
-        </MenuItem>
+        <Box>
+          <Slider
+            aria-label="PlaybackRateSlider"
+            max={1.5}
+            step={0.01}
+            min={0.5}
+            onChange={(e, v: number | number[]) => setRate(v as number)}
+            onChangeCommitted={() => setAnchorEl(null)}
+            orientation="vertical"
+            size="small"
+            sx={{
+              '& input[type="range"]': { WebkitAppearance: 'slider-vertical' },
+              height: '80px',
+              lineHeight: '0',
+            }}
+            value={rate}
+            valueLabelFormat={v => v}
+          />
+        </Box>
       </Menu>
     </>
   );

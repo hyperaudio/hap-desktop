@@ -1,23 +1,27 @@
 import React, { useEffect } from 'react';
+import ReactPlayer from 'react-player';
 import { Outlet } from 'react-router-dom';
-import { PropsWithChildren, useMemo } from 'react';
+import { createContext, MutableRefObject, PropsWithChildren, useMemo, useRef } from 'react';
 import { useAtom } from 'jotai';
 import { ipcRenderer } from 'electron';
 
+import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
-import Paper from '@mui/material/Paper';
 import { Color, PaletteMode } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 
+import { _SettingsMode, _SettingsColor } from '@/state';
 import { createMuiTheme } from '@/themes';
-import { settingsModeAtom, settingsColorAtom, serverInfoAtom } from '@/state';
 
-const getServerInfo = (): Promise<[]> => ipcRenderer.invoke('server-info');
+export const PlayerRefContext = createContext<MutableRefObject<ReactPlayer> | null>(null);
+export const DraggableBoundsRefContext = createContext<MutableRefObject<HTMLElement> | null>(null);
 
 export const MainView: React.FC<PropsWithChildren> = () => {
-  const [color] = useAtom(settingsColorAtom);
-  const [mode] = useAtom(settingsModeAtom);
-  const [serverInfo, setServerInfo] = useAtom(serverInfoAtom);
+  const [color] = useAtom(_SettingsColor);
+  const [mode] = useAtom(_SettingsMode);
+
+  const PlayerRef = useRef<ReactPlayer>() as MutableRefObject<ReactPlayer>;
+  const BoundsRef = useRef<HTMLElement>() as MutableRefObject<HTMLElement>;
 
   const theme = useMemo(
     () => createMuiTheme({ mode: mode as PaletteMode, color: color as Color }),
@@ -33,12 +37,16 @@ export const MainView: React.FC<PropsWithChildren> = () => {
   useEffect(() => console.log({ serverInfo }), [serverInfo]);
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Paper sx={{ borderRadius: 0, height: '100vh' }}>
-        <Outlet />
-      </Paper>
-    </ThemeProvider>
+    <DraggableBoundsRefContext.Provider value={BoundsRef}>
+      <PlayerRefContext.Provider value={PlayerRef}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <Box sx={{ height: '100vh' }}>
+            <Outlet />
+          </Box>
+        </ThemeProvider>
+      </PlayerRefContext.Provider>
+    </DraggableBoundsRefContext.Provider>
   );
 };
 

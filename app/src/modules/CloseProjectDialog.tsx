@@ -13,7 +13,7 @@ import IconButton from '@mui/material/IconButton';
 import Toolbar from '@mui/material/Toolbar';
 import { DialogProps } from '@mui/material';
 
-import { filePathAtom } from '@/state';
+import { _ProjectPath } from '@/state';
 
 const PREFIX = 'CloseProjectDialog';
 const classes = {
@@ -25,7 +25,7 @@ interface CloseProjectDialogProps extends DialogProps {
 }
 
 export const CloseProjectDialog: React.FC<CloseProjectDialogProps> = ({ onClose, ...props }) => {
-  const [, setFilePath] = useAtom(filePathAtom);
+  const [, setFilePath] = useAtom(_ProjectPath);
 
   const onCancel = () => {
     onClose();

@@ -1,9 +1,8 @@
-import React, { useState, useMemo, useRef, useCallback, useEffect, useLayoutEffect, MutableRefObject } from 'react';
-import ReactPlayer from 'react-player';
+import React, { useContext, useState, useMemo, useRef, useCallback, useEffect, MutableRefObject } from 'react';
 import { EditorState, ContentState, RawDraftContentBlock, convertFromRaw } from 'draft-js';
-import { Pinwheel } from '@uiball/loaders';
 import { ipcRenderer } from 'electron';
 import { useAtom } from 'jotai';
+import { useDraggable } from '@neodrag/react';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -13,13 +12,14 @@ import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Toolbar from '@mui/material/Toolbar';
 import { BoxProps } from '@mui/material';
-import { styled, useTheme } from '@mui/material/styles';
+import { styled } from '@mui/material/styles';
 
+import { DraggableBoundsRefContext } from '@/views';
 import { Editor, createEntityMap, PlaybackBar, TabBar } from '@/modules';
 import { ElectronUtils, FilesystemUtils } from '@/utils';
+import { Preloader } from '@/components';
 import { Project } from '@/models';
-import { Video } from '@/components';
-import { filePathAtom } from '@/state';
+import { _PlayerElapsed, _PlayerUrl, _ProjectPath } from '@/state';
 
 const PREFIX = 'EditorPage';
 const CONTROLS_HEIGHT = 60;
@@ -124,24 +124,24 @@ const Root = styled(Box, {
 }));
 
 export const EditPage: React.FC = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
+  const DraggableBoundsRef = useContext(DraggableBoundsRefContext);
 
-  const [filePath, setFilePath] = useAtom(filePathAtom);
+  // shared state
+  const [filePath, setFilePath] = useAtom(_ProjectPath);
+  const [, setUrl] = useAtom(_PlayerUrl);
 
+  // local state
   const [error, setError] = useState<Error>();
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
-
+  const [speakers, setSpeakers] = useState({});
   const [metadata, setMetadata] = useState<Record<string, any>>({ id: uuidv4() });
   const [media, setMedia] = useState<Record<string, any>>({});
-  const [url, setUrl] = useState<string | undefined>();
   const [data, setData] = useState<{ speakers: { [key: string]: any } | null; blocks: RawDraftContentBlock[] | null }>({
     speakers: null,
     blocks: null,
   });
 
-  const [speakers, setSpeakers] = useState({});
   const { blocks } = data ?? {};
 
   const initialState = useMemo(
@@ -154,27 +154,6 @@ export const EditPage: React.FC = () => {
     blocks: RawDraftContentBlock[];
     contentState: ContentState;
   }>();
-
-  const [hideVideo, setHideVideo] = useState(false);
-
-  const [time, setTime] = useState(0);
-  const [seekTime, setSeekTime] = useState(0);
-  const [playing, setPlaying] = useState(false);
-  const [duration, setDuration] = useState(0);
-  const [buffering, setBuffering] = useState(false);
-  const [pip, setPip] = useState(false);
-
-  const play = useCallback(() => setPlaying(true), []);
-  const pause = useCallback(() => setPlaying(false), []);
-
-  const player = useRef<ReactPlayer>() as MutableRefObject<ReactPlayer>;
-  const seekTo = useCallback(
-    (time: number): void => {
-      setSeekTime(time);
-      if (player.current) player.current.seekTo(time, 'seconds');
-    },
-    [player],
-  );
 
   const handleOpen = useCallback(async (path: string) => {
     try {
@@ -200,14 +179,6 @@ export const EditPage: React.FC = () => {
   const noKaraoke = false;
 
   const div = useRef<HTMLDivElement>() as MutableRefObject<HTMLDivElement>;
-  const [top, setTop] = useState(500);
-
-  useLayoutEffect(() => {
-    // console.log('useLayoutEffect');
-    const value = div.current?.getBoundingClientRect().top ?? 500;
-    console.log(div.current?.getBoundingClientRect(), value, pip);
-    setTop(value);
-  }, [div, pip]);
 
   useEffect(() => {
     ipcRenderer.on('menu-action', (_, action) => {
@@ -267,112 +238,80 @@ export const EditPage: React.FC = () => {
     }
   }, [filePath]);
 
+  if (loading) return <Preloader title="Loading your project…" />;
+  if (!initialState) return null;
+
   return (
     <>
       <Root className={classes.root} alignItems="stretch" alignContent="stretch">
-        {!initialState ? (
-          <>{loading && <Pinwheel size={36} lineWeight={2.5} speed={1.5} color={theme.palette.primary.main} />}</>
-        ) : (
-          <>
-            <AppBar
-              component="header"
-              elevation={0}
-              position="fixed"
-              sx={theme => ({
-                bgcolor: 'background.paper',
-                borderBottom: `1px solid ${theme.palette.divider}`,
-                bottom: 'auto',
-                left: 0,
-                right: 0,
-                top: 0,
-                width: 'auto',
-              })}
-            >
-              <TabBar />
-            </AppBar>
-
-            <Box
-              sx={{
-                bottom: '64px',
-                left: 0,
-                overflow: 'auto',
-                position: 'fixed',
-                right: 0,
-                scrollBehavior: 'smooth',
-                top: '48px',
-              }}
-            >
-              <Toolbar />
-              <Container maxWidth={false}>
-                <Grid container>
-                  <Grid item xs={12} sm={3} />
-                  <Grid item xs={12} sm={6}>
-                    <Container ref={div} fixed maxWidth="sm">
-                      {initialState ? (
-                        <Editor
-                          {...{ initialState, time, seekTo, speakers, setSpeakers, playing, play, pause }}
-                          autoScroll
-                          onChange={setDraft}
-                          playheadDecorator={noKaraoke ? null : undefined}
-                        />
-                      ) : error ? (
-                        <p>Error: {error?.message}</p>
-                      ) : (
-                        <></>
-                      )}
-                    </Container>
-                  </Grid>
-                  <Grid item xs={12} sm={3} />
-                </Grid>
-              </Container>
-              <Toolbar />
-              {url && (
-                <Box
-                  sx={{ position: 'fixed', bottom: '74px', left: '50%', transform: 'translateX(-50%)', width: '33%' }}
-                >
-                  <Video
-                    ref={player}
-                    {...{
-                      url,
-                      playing,
-                      play,
-                      pause,
-                      buffering,
-                      setBuffering,
-                      time,
-                      setTime,
-                      duration,
-                      setDuration,
-                      pip,
-                      setPip,
-                      hideVideo,
-                      setHideVideo,
-                      seekTime,
-                      setSeekTime,
-                    }}
-                  />
-                </Box>
-              )}
-            </Box>
-
-            <AppBar
-              component="footer"
-              elevation={0}
-              position="fixed"
-              sx={theme => ({
-                bgcolor: 'background.paper',
-                borderTop: `1px solid ${theme.palette.divider}`,
-                bottom: 0,
-                left: 0,
-                right: 0,
-                top: 'auto',
-                width: 'auto',
-              })}
-            >
-              <PlaybackBar />
-            </AppBar>
-          </>
-        )}
+        <AppBar
+          component="header"
+          elevation={0}
+          position="fixed"
+          sx={theme => ({
+            bgcolor: 'background.default',
+            borderBottom: `1px solid ${theme.palette.divider}`,
+            bottom: 'auto',
+            left: 0,
+            right: 0,
+            top: 0,
+            width: 'auto',
+          })}
+        >
+          <TabBar />
+        </AppBar>
+        <Box
+          ref={DraggableBoundsRef}
+          sx={{
+            bottom: '64px',
+            left: 0,
+            overflow: 'auto',
+            position: 'fixed',
+            right: 0,
+            top: '48px',
+          }}
+        >
+          <Toolbar />
+          <Container maxWidth={false}>
+            <Grid container>
+              <Grid item xs={12} sm={3} />
+              <Grid item xs={12} sm={6}>
+                <Container ref={div} fixed maxWidth="sm">
+                  {initialState ? (
+                    <Editor
+                      {...{ initialState, speakers, setSpeakers }}
+                      autoScroll
+                      onChange={setDraft}
+                      playheadDecorator={noKaraoke ? null : undefined}
+                    />
+                  ) : error ? (
+                    <p>Error: {error?.message}</p>
+                  ) : (
+                    <></>
+                  )}
+                </Container>
+              </Grid>
+              <Grid item xs={12} sm={3} />
+            </Grid>
+          </Container>
+          <Toolbar />
+        </Box>
+        <AppBar
+          component="footer"
+          elevation={0}
+          position="fixed"
+          sx={theme => ({
+            bgcolor: 'background.default',
+            borderTop: `1px solid ${theme.palette.divider}`,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            top: 'auto',
+            width: 'auto',
+          })}
+        >
+          <PlaybackBar />
+        </AppBar>
       </Root>
     </>
   );

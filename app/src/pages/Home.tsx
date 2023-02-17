@@ -13,7 +13,7 @@ import Typography from '@mui/material/Typography';
 import { BoxProps } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
-import { filePathAtom } from '@/state';
+import { _ProjectPath } from '@/state';
 import { ElectronUtils } from '@/utils';
 
 const PREFIX = 'HomePage';
@@ -39,7 +39,7 @@ export const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const [filePath, setFilePath] = useAtom(filePathAtom);
+  const [filePath, setFilePath] = useAtom(_ProjectPath);
 
   const onOpen = useCallback(async () => {
     const readFilePath = await ElectronUtils.getReadPath();

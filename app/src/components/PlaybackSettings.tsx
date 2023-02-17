@@ -1,4 +1,5 @@
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
+import { useAtom } from 'jotai';
 
 import Box from '@mui/material/Box';
 import FeaturedVideoOutlinedIcon from '@mui/icons-material/FeaturedVideoOutlined';
@@ -13,6 +14,7 @@ import { BoxProps } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
 import { useSettingsDialog } from '@/modules';
+import { _PlayerPin, _PlayerVolume } from '@/state';
 
 interface PlaybackSettingsProps extends BoxProps {}
 
@@ -26,40 +28,34 @@ const Root = styled(Box)(({ theme }) => ({
 }));
 
 export const PlaybackSettings: React.FC<PlaybackSettingsProps> = ({ ...props }) => {
+  // shared state
+  const [pin, setPin] = useAtom(_PlayerPin);
   const [showSettings, settingsDialog] = useSettingsDialog();
+  const [volume, setVolume] = useAtom(_PlayerVolume);
 
-  const [value, setValue] = useState<number>(30);
-  const [video, setVideo] = useState<boolean>(true);
+  const onChangeVolume = (v: number) => setVolume(v);
+  const onMute = useCallback(() => setVolume(volume > 0 ? 0 : 1), [volume]);
+  const onPinVideo = useCallback(() => setPin(!pin), [pin]);
 
-  const onMute = useCallback(() => {
-    if (value > 0) setValue(0);
-    console.log('Mute');
-  }, [value]);
-
-  const onPinVideo = useCallback(() => {
-    setVideo(!video);
-  }, [video]);
-
-  const handleChange = (event: Event, newValue: number | number[]) => {
-    setValue(newValue as number);
-  };
   return (
     <>
       <Root className={classes.root}>
         <Stack spacing={4} direction="row" alignItems="center">
           <Stack direction="row" alignItems="center" justifyContent="space-between">
-            <Tooltip title={value === 0 ? 'Unmute' : 'Mute'}>
+            <Tooltip title={volume === 0 ? 'Unmute' : 'Mute'}>
               <IconButton size="small" onClick={onMute}>
-                {value > 0 ? <VolumeDown /> : <VolumeOffIcon />}
+                {volume > 0 ? <VolumeDown /> : <VolumeOffIcon />}
               </IconButton>
             </Tooltip>
             <Slider
               aria-label="Volume"
-              onChange={handleChange}
+              max={1}
+              min={0}
+              onChange={(e, v) => onChangeVolume(v as number)}
               size="small"
+              step={0.01}
               sx={{ minWidth: '64px' }}
-              value={value}
-              valueLabelDisplay="auto"
+              value={volume}
             />
           </Stack>
           <Stack direction="row" alignItems="center">
@@ -67,7 +63,7 @@ export const PlaybackSettings: React.FC<PlaybackSettingsProps> = ({ ...props }) 
               <IconButton
                 size="small"
                 onClick={onPinVideo}
-                sx={theme => ({ color: video ? theme.palette.text.primary : theme.palette.text.secondary })}
+                sx={theme => ({ color: pin ? theme.palette.text.primary : theme.palette.text.secondary })}
               >
                 <FeaturedVideoOutlinedIcon />
               </IconButton>
