@@ -1,3 +1,4 @@
+import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
 
 import { Color, PaletteMode } from '@mui/material';
@@ -9,3 +10,5 @@ const darkMode = window.matchMedia('(prefers-color-scheme: dark)');
 export const _SettingsMode = atomWithStorage<PaletteMode>('mode', darkMode ? 'dark' : 'light');
 
 export const _SettingsColor = atomWithStorage<Color>('color', deepPurple);
+
+export const serverInfoAtom = atom<any[]>([]);
