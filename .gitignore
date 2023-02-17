@@ -458,3 +458,6 @@ app/server/
 
 # Ignore test models
 app/models
+
+# Ignore conda environment
+.conda

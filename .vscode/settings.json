@@ -22,5 +22,8 @@
   ],
   "python.formatting.provider": "black",
   "terminal.integrated.inheritEnv": false,
-  "python.terminal.activateEnvironment": true
+  "python.terminal.activateEnvironment": true,
+  "terminal.integrated.env.osx": {
+    "PATH": ""
+  }
 }
