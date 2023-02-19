@@ -14,7 +14,7 @@ import { styled } from '@mui/material/styles';
 
 import { DraggableBoundsRefContext } from '@/views';
 import { PlaybackControls, PlaybackSlider, PlaybackSettings, Video } from '@/components';
-import { _PlayerUrl, _PlayerPin } from '@/state';
+import { PlayerUrlAtom, PlayerPinAtom } from '@/state';
 
 interface PlaybackBarProps extends ToolbarProps {}
 
@@ -39,8 +39,8 @@ export const PlaybackBar: React.FC<PlaybackBarProps> = ({ ...props }) => {
   });
 
   // shared state
-  const [url] = useAtom(_PlayerUrl);
-  const [pin] = useAtom(_PlayerPin);
+  const [url] = useAtom(PlayerUrlAtom);
+  const [pin] = useAtom(PlayerPinAtom);
 
   // local state
   const [showPlayer, setShowPlayer] = useState<boolean>();

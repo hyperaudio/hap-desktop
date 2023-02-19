@@ -39,7 +39,7 @@ import { styled, useTheme } from '@mui/material/styles';
 
 import PlayheadDecorator from './PlayheadDecorator';
 import reducer from './reducer';
-import { _PlayerElapsed, _PlayerPlaying } from '@/state';
+import { PlayerElapsedAtom, PlayerPlayingAtom } from '@/state';
 import { PlayerRefContext } from '@/views';
 
 const filter = createFilterOptions();
@@ -155,8 +155,8 @@ export const Editor = ({
   const PlayerRef = useContext(PlayerRefContext);
 
   // shared state
-  const [time, setTime] = useAtom(_PlayerElapsed);
-  const [playing, setPlaying] = useAtom(_PlayerPlaying);
+  const [time, setTime] = useAtom(PlayerElapsedAtom);
+  const [playing, setPlaying] = useAtom(PlayerPlayingAtom);
 
   const [state, dispatch] = useReducer(reducer, initialState);
   // const [speakers, setSpeakers] = useState(

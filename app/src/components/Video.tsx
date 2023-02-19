@@ -2,19 +2,26 @@ import ReactPlayer from 'react-player';
 import { useContext, ForwardedRef, forwardRef, useCallback, useEffect, useMemo } from 'react';
 import { useAtom } from 'jotai';
 
-import { _PlayerDuration, _PlayerElapsed, _PlayerPlaying, _PlayerRate, _PlayerUrl, _PlayerVolume } from '@/state';
+import {
+  PlayerDurationAtom,
+  PlayerElapsedAtom,
+  PlayerPlayingAtom,
+  PlayerRateAtom,
+  PlayerUrlAtom,
+  PlayerVolumeAtom,
+} from '@/state';
 import { PlayerRefContext } from '@/views';
 
 export const Video = forwardRef(({}: {}, ref: ForwardedRef<ReactPlayer | null>): JSX.Element | null => {
   const PlayerRef = useContext(PlayerRefContext);
 
   // shared state
-  const [, setDuration] = useAtom(_PlayerDuration);
-  const [elapsed, setElapsed] = useAtom(_PlayerElapsed);
-  const [playing] = useAtom(_PlayerPlaying);
-  const [rate] = useAtom(_PlayerRate);
-  const [url] = useAtom(_PlayerUrl);
-  const [volume] = useAtom(_PlayerVolume);
+  const [, setDuration] = useAtom(PlayerDurationAtom);
+  const [elapsed, setElapsed] = useAtom(PlayerElapsedAtom);
+  const [playing] = useAtom(PlayerPlayingAtom);
+  const [rate] = useAtom(PlayerRateAtom);
+  const [url] = useAtom(PlayerUrlAtom);
+  const [volume] = useAtom(PlayerVolumeAtom);
 
   const config = useMemo(
     () => ({

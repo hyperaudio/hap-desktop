@@ -19,7 +19,7 @@ import { Editor, createEntityMap, PlaybackBar, TabBar } from '@/modules';
 import { ElectronUtils, FilesystemUtils } from '@/utils';
 import { Preloader } from '@/components';
 import { Project } from '@/models';
-import { _PlayerElapsed, _PlayerUrl, _ProjectPath } from '@/state';
+import { PlayerElapsedAtom, PlayerUrlAtom, ProjectPathAtom } from '@/state';
 
 const PREFIX = 'EditorPage';
 const CONTROLS_HEIGHT = 60;
@@ -128,8 +128,8 @@ export const EditPage: React.FC = () => {
   const DraggableBoundsRef = useContext(DraggableBoundsRefContext);
 
   // shared state
-  const [filePath, setFilePath] = useAtom(_ProjectPath);
-  const [, setUrl] = useAtom(_PlayerUrl);
+  const [filePath, setFilePath] = useAtom(ProjectPathAtom);
+  const [, setUrl] = useAtom(PlayerUrlAtom);
 
   // local state
   const [error, setError] = useState<Error>();

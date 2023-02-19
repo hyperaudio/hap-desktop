@@ -13,7 +13,7 @@ import Tooltip from '@mui/material/Tooltip';
 import { BoxProps, Slider } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
-import { _PlayerElapsed, _PlayerPlaying, _PlayerRate } from '@/state';
+import { PlayerElapsedAtom, PlayerPlayingAtom, PlayerRateAtom } from '@/state';
 import { PlayerRefContext } from '@/views';
 
 interface PlaybackControlsProps extends BoxProps {}
@@ -41,9 +41,9 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({ ...props }) 
   const PlayerRef = useContext(PlayerRefContext);
 
   //shared state
-  const [elapsed, setElapsed] = useAtom(_PlayerElapsed);
-  const [playing, setPlaying] = useAtom(_PlayerPlaying);
-  const [rate, setRate] = useAtom(_PlayerRate);
+  const [elapsed, setElapsed] = useAtom(PlayerElapsedAtom);
+  const [playing, setPlaying] = useAtom(PlayerPlayingAtom);
+  const [rate, setRate] = useAtom(PlayerRateAtom);
 
   // local state
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);

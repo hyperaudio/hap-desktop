@@ -14,7 +14,7 @@ import { BoxProps } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
 import { useSettingsDialog } from '@/modules';
-import { _PlayerPin, _PlayerVolume } from '@/state';
+import { PlayerPinAtom, PlayerVolumeAtom } from '@/state';
 
 interface PlaybackSettingsProps extends BoxProps {}
 
@@ -29,9 +29,9 @@ const Root = styled(Box)(({ theme }) => ({
 
 export const PlaybackSettings: React.FC<PlaybackSettingsProps> = ({ ...props }) => {
   // shared state
-  const [pin, setPin] = useAtom(_PlayerPin);
+  const [pin, setPin] = useAtom(PlayerPinAtom);
   const [showSettings, settingsDialog] = useSettingsDialog();
-  const [volume, setVolume] = useAtom(_PlayerVolume);
+  const [volume, setVolume] = useAtom(PlayerVolumeAtom);
 
   const onChangeVolume = (v: number) => setVolume(v);
   const onMute = useCallback(() => setVolume(volume > 0 ? 0 : 1), [volume]);

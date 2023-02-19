@@ -7,7 +7,7 @@ import { BoxProps, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
 import { PlayerRefContext } from '@/views';
-import { _PlayerDuration, _PlayerElapsed } from '@/state';
+import { PlayerDurationAtom, PlayerElapsedAtom } from '@/state';
 import { formatTime } from '@/utils';
 
 interface PlaybackSliderProps extends BoxProps {}
@@ -44,8 +44,8 @@ export const PlaybackSlider: React.FC<PlaybackSliderProps> = ({ ...props }) => {
   const PlayerRef = useContext(PlayerRefContext);
 
   // shared state
-  const [elapsed, setElapsed] = useAtom(_PlayerElapsed);
-  const [duration] = useAtom(_PlayerDuration);
+  const [elapsed, setElapsed] = useAtom(PlayerElapsedAtom);
+  const [duration] = useAtom(PlayerDurationAtom);
 
   const displayElapsed = useMemo(() => formatTime(elapsed), [elapsed]);
   const displayRemaining = useMemo(() => formatTime(duration - elapsed), [duration, elapsed]);

@@ -9,12 +9,12 @@ import Menu from '@mui/material/Menu';
 import { Color, IconButtonProps } from '@mui/material';
 
 import { colors } from '@/config';
-import { _SettingsColor } from '@/state';
+import { SettingsColorAtom } from '@/state';
 
 interface ColorSwitchProps extends IconButtonProps {}
 
 export const ColorSwitch: React.FC<ColorSwitchProps> = ({ ...props }) => {
-  const [color, setColor] = useAtom(_SettingsColor);
+  const [color, setColor] = useAtom(SettingsColorAtom);
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);

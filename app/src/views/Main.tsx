@@ -8,15 +8,15 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { Color, PaletteMode } from '@mui/material';
 import { ThemeProvider } from '@mui/material/styles';
 
-import { _SettingsMode, _SettingsColor } from '@/state';
+import { SettingsModeAtom, SettingsColorAtom } from '@/state';
 import { createMuiTheme } from '@/themes';
 
 export const PlayerRefContext = createContext<MutableRefObject<ReactPlayer> | null>(null);
 export const DraggableBoundsRefContext = createContext<MutableRefObject<HTMLElement> | null>(null);
 
 export const MainView: React.FC<PropsWithChildren> = () => {
-  const [color] = useAtom(_SettingsColor);
-  const [mode] = useAtom(_SettingsMode);
+  const [color] = useAtom(SettingsColorAtom);
+  const [mode] = useAtom(SettingsModeAtom);
 
   const PlayerRef = useRef<ReactPlayer>() as MutableRefObject<ReactPlayer>;
   const BoundsRef = useRef<HTMLElement>() as MutableRefObject<HTMLElement>;
