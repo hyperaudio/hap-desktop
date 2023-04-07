@@ -203,8 +203,6 @@ export const Editor = ({
   }, [debouncedState, speakers, onChangeProp]);
 
   const [focused, setFocused] = useState(false);
-  const onFocus = useCallback(() => setFocused(true), []);
-  const onBlur = useCallback(() => setFocused(false), []);
 
   const editorState = useMemo(
     () =>
@@ -223,6 +221,15 @@ export const Editor = ({
     [state, time, playheadDecorator, decorators, focused],
   );
 
+  const onFocus = useCallback(() => setFocused(true), []);
+  const onBlur = useCallback(() => {
+    if (!editorState) return;
+    const selectionState = editorState.getSelection();
+    if (!selectionState.isCollapsed()) return;
+
+    setFocused(false);
+  }, [editorState]);
+
   const seekTo = useCallback(
     (time: number) => {
       if (!PlayerRef) return;
@@ -234,13 +241,12 @@ export const Editor = ({
 
   const handleClick = useCallback(
     (event: React.MouseEvent<HTMLElement>) => {
-      setFocused(true);
-      setTimeout(() => setFocused(true), 200);
-
       if (!editorState) return;
-
       const selectionState = editorState.getSelection();
       if (!selectionState.isCollapsed()) return;
+
+      setFocused(true);
+      setTimeout(() => setFocused(true), 200);
 
       const target = event.target as HTMLElement;
 

@@ -280,7 +280,7 @@ export const EditPage: React.FC = () => {
                   {initialState ? (
                     <Editor
                       {...{ initialState, speakers, setSpeakers }}
-                      // autoScroll
+                      autoScroll
                       onChange={setDraft}
                       playheadDecorator={noKaraoke ? null : undefined}
                     />
