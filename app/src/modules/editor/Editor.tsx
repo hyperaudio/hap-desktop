@@ -18,6 +18,7 @@ import {
   Modifier,
   RawDraftContentBlock,
   convertToRaw,
+  RichUtils,
 } from 'draft-js';
 import TC, { FRAMERATE } from 'smpte-timecode';
 // import { alignSTTwithPadding } from '@bbc/stt-align-node';
@@ -110,6 +111,15 @@ const Root = styled(Box)(({ theme }) => ({
     display: 'block',
   },
 }));
+
+const styleMap = {
+  STRIKETHROUGH: {
+    textDecoration: 'line-through',
+  },
+  HIGHLIGHT: {
+    backgroundColor: 'rgba(255, 0, 217, 0.2)',
+  },
+};
 
 interface EditorProps {
   initialState: EditorState;
@@ -228,7 +238,6 @@ export const Editor = ({
       setTimeout(() => setFocused(true), 200);
 
       if (!editorState) return;
-      // console.log(e.target);
 
       const selectionState = editorState.getSelection();
       if (!selectionState.isCollapsed()) return;
@@ -414,6 +423,45 @@ export const Editor = ({
     } else playhead?.scrollIntoView({ block: 'start' });
   }, [autoScroll, wrapper, time, focused, speakerAnchor, readOnly, editorState, engine]);
 
+  const handleKeyCommand = useCallback(
+    (command: string, editorState: EditorState) => {
+      const newState = RichUtils.handleKeyCommand(editorState, command);
+
+      if (newState) {
+        onChange(newState);
+        return 'handled';
+      }
+
+      return 'not-handled';
+    },
+    [onChange],
+  );
+
+  const onBoldClick = useCallback(
+    () => onChange(RichUtils.toggleInlineStyle(editorState, 'BOLD')),
+    [editorState, onChange],
+  );
+
+  const onItalicClick = useCallback(
+    () => onChange(RichUtils.toggleInlineStyle(editorState, 'ITALIC')),
+    [editorState, onChange],
+  );
+
+  const onUnderlineClick = useCallback(
+    () => onChange(RichUtils.toggleInlineStyle(editorState, 'UNDERLINE')),
+    [editorState, onChange],
+  );
+
+  const onStrikethroughClick = useCallback(
+    () => onChange(RichUtils.toggleInlineStyle(editorState, 'STRIKETHROUGH')),
+    [editorState, onChange],
+  );
+
+  const onHighlightClick = useCallback(
+    () => onChange(RichUtils.toggleInlineStyle(editorState, 'HIGHLIGHT')),
+    [editorState, onChange],
+  );
+
   return (
     <Root
       className={`${classes.root} focus-${focused}`}
@@ -421,12 +469,19 @@ export const Editor = ({
       // onMouseMove={handleMouseMove}
       ref={wrapper}
     >
+      <button onClick={onBoldClick}>Bold</button>
+      <button onClick={onItalicClick}>Italic</button>
+      <button onClick={onUnderlineClick}>Underline</button>
+      <button onClick={onStrikethroughClick}>Strikethrough</button>
+      <button onClick={onHighlightClick}>Highlight</button>
       <DraftEditor
         {...{ editorState, onChange, onFocus, onBlur, readOnly, ...rest }}
         // handleDrop={() => true}
         // handleDroppedFiles={() => true}
         // handlePastedFiles={() => true}
         handlePastedText={handlePastedText}
+        handleKeyCommand={handleKeyCommand}
+        customStyleMap={styleMap}
       />
       {editorState
         .getCurrentContent()
